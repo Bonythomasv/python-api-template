@@ -23,6 +23,9 @@ retry2 = "^0.9"
 deprecated = "^1.2"
 # simple logging that just works
 loguru = "*"
+fastapi = "^0.115.6"
+pydantic = "^2.10.4"
+uvicorn = "^0.34.0"
 
 [tool.poetry.group.dev.dependencies]
 # test framework

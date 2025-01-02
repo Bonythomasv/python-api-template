@@ -336,3 +336,5 @@ all:
 .PHONY: clean
 clean: ## Clean artifacts from build and dist directories
 	rm -rf $(BUILD_DIR) dist/requirements.txt
+start:
+	python3 -m example
