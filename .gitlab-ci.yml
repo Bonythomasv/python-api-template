@@ -17,6 +17,13 @@ variables:
 default:
   image: python:${PYTHON_VERSION}
 
+
+before_script:
+  - echo "Checking if Homebrew is installed"
+  - if ! command -v brew &>/dev/null; then echo "Installing Homebrew"; /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; fi
+  - export PATH="$HOMEBREW_PREFIX/bin:$PATH"
+  - eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
+
 # Dependency installation stage
 deps:
   stage: deps
@@ -26,8 +33,6 @@ deps:
     - source ${VENV_DIR}/bin/activate
     - pip install --upgrade pip
     - pip install poetry
-    - echo "Installing Homebrew"
-    - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     - echo "Installing dependencies with Brew"
     - brew bundle install --no-lock --verbose --file=Brewfile
     - echo "Installing dependencies with Makefile"
