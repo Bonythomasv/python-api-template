@@ -3,9 +3,9 @@ stages:
   - check
   - test
   - build
+  - docker
 
 # Define the agent to be used for the pipeline
-# Replace 'my-agent' with the name of your agent
 # gitlab-agent:
 #   name: "my-agent"
 #   environment: "non-prod"  # Optional: specify environment if needed
@@ -14,7 +14,6 @@ variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
 
-# Default image to be used in the pipeline
 default:
   image: python:${PYTHON_VERSION}
 
@@ -23,14 +22,11 @@ deps:
   stage: deps
   script:
     - echo "Setting up environment"
-    - python -m venv ${VENV_DIR}
+    - python3 -m venv ${VENV_DIR}
     - source ${VENV_DIR}/bin/activate
+    - pip install --upgrade pip
     - pip install poetry
     - poetry install
-    - echo "Installing Homebrew"
-    - apt-get update && apt-get install -y build-essential curl file git
-    - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
     - echo "Installing dependencies with Makefile"
     - make deps
   artifacts:
@@ -38,7 +34,7 @@ deps:
       - ${VENV_DIR}
     expire_in: 1 day
 
-# Check environment and paths
+# Show paths and environment
 check:
   stage: check
   script:
@@ -73,3 +69,19 @@ build:
     paths:
       - dist/
       - build/
+
+# Docker build and publish stage
+docker:
+  stage: docker
+  script:
+    - echo "Logging into Docker registry"
+    - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - echo "Building Docker image"
+    - docker build -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project .
+    - echo "Pushing Docker image"
+    - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project
+  only:
+    - main
+  variables:
+    DOCKER_USERNAME: $CI_REGISTRY_USER
+    DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
