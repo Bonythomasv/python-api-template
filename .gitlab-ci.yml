@@ -4,10 +4,17 @@ stages:
   - test
   - build
 
+# Define the agent to be used for the pipeline
+# Replace 'my-agent' with the name of your agent
+# gitlab-agent:
+#   name: "my-agent"
+#   environment: "non-prod"  # Optional: specify environment if needed
+
 variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
 
+# Default image to be used in the pipeline
 default:
   image: python:${PYTHON_VERSION}
 
@@ -20,6 +27,10 @@ deps:
     - source ${VENV_DIR}/bin/activate
     - pip install poetry
     - poetry install
+    - echo "Installing Homebrew"
+    - apt-get update && apt-get install -y build-essential curl file git
+    - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
     - echo "Installing dependencies with Makefile"
     - make deps
   artifacts:
@@ -27,7 +38,7 @@ deps:
       - ${VENV_DIR}
     expire_in: 1 day
 
-# Show paths and environment
+# Check environment and paths
 check:
   stage: check
   script:
