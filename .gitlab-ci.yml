@@ -1,0 +1,64 @@
+stages:
+  - deps
+  - check
+  - test
+  - build
+
+variables:
+  PYTHON_VERSION: "3.10"
+  VENV_DIR: ".venv"
+
+default:
+  image: python:${PYTHON_VERSION}
+
+# Dependency installation stage
+deps:
+  stage: deps
+  script:
+    - echo "Setting up environment"
+    - python -m venv ${VENV_DIR}
+    - source ${VENV_DIR}/bin/activate
+    - pip install poetry
+    - poetry install
+    - echo "Installing dependencies with Makefile"
+    - make deps
+  artifacts:
+    paths:
+      - ${VENV_DIR}
+    expire_in: 1 day
+
+# Show paths and environment
+check:
+  stage: check
+  script:
+    - echo "Showing environment paths"
+    - echo "${PATH}"
+    - command -v pyenv || true
+    - command -v poetry || true
+    - command -v python3 || true
+    - echo "Running make check"
+    - make check
+
+# Testing stage
+test:
+  stage: test
+  script:
+    - source ${VENV_DIR}/bin/activate
+    - echo "Running tests"
+    - make test
+  artifacts:
+    when: always
+    paths:
+      - tests/reports/
+
+# Build stage
+build:
+  stage: build
+  script:
+    - source ${VENV_DIR}/bin/activate
+    - echo "Building the project"
+    - make build
+  artifacts:
+    paths:
+      - dist/
+      - build/
