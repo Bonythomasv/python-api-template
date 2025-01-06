@@ -23,6 +23,9 @@ before_script:
   - if ! command -v brew &>/dev/null; then echo "Installing Homebrew"; /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; fi
   - export PATH="$HOMEBREW_PREFIX/bin:$PATH"
   - eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
+  - echo "Homebrew path setup completed"
+  - echo "Installing python3-venv package"
+  - sudo apt-get update && sudo apt-get install -y python3-venv
 
 # Dependency installation stage
 deps:
