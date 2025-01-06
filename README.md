@@ -16,6 +16,16 @@ Read more about why this exists at the Target Tech blog post
 > make deps
 > make deps check test build
 
+To add a new Dependecy
+> poetry add uvicorn
+to Run API server
+> poetry run uvicorn example:app --reload
+
+To build docker images
+> docker build -t target-make-python-devex:latest .
+To Run Docker container
+> docker run -p 8000:8000 make-python-devex:latest
+
 Run `make help` to see the tasks available.
 
 In theory, run `make deps` until it succeeds, following any instructions output
