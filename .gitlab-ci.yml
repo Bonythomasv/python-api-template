@@ -5,7 +5,7 @@ stages:
   - build
   - docker
 
-# Define the agent to be used for the pipeline
+# # Define the agent to be used for the pipeline
 # gitlab-agent:
 #   name: "my-agent"
 #   environment: "non-prod"  # Optional: specify environment if needed
@@ -26,7 +26,10 @@ deps:
     - source ${VENV_DIR}/bin/activate
     - pip install --upgrade pip
     - pip install poetry
-    - poetry install
+    - echo "Installing Homebrew"
+    - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - echo "Installing dependencies with Brew"
+    - brew bundle install --no-lock --verbose --file=Brewfile
     - echo "Installing dependencies with Makefile"
     - make deps
   artifacts:
