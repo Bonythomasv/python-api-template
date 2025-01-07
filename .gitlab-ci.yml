@@ -49,9 +49,10 @@ build_and_test_and_deploy:
     - make deps test build
     - echo "Building Docker image"
     - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
-    - docker build -t target-make-python-devex:latest registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project . || { echo "Docker build failed"; exit 1; }
+    - docker build -t target-make-python-devex:latest -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project .
     - echo "Pushing Docker image"
-    - docker push §c   || { echo "Docker push failed"; exit 1; }
+    - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project:latest
+
   # artifacts:
   #   when: always
   #   paths:
