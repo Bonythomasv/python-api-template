@@ -6,7 +6,11 @@ variables:
   VENV_DIR: ".venv"
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-
+  DOCKER_REGISTRY: "registry.infosec.it.ubc.ca"
+  IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project"
+  IMAGE_TAG: "latest"
+  DOCKER_USERNAME: $CI_REGISTRY_USER
+  DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
 default:
   image: python:${PYTHON_VERSION}
 
@@ -16,13 +20,11 @@ services:
     entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
 
 before_script:
-  - apt-get update && apt-get install -y docker.io || { echo "Failed to install Docker CLI"; exit 1; }
-  - echo "Starting Docker daemon"
-  - dockerd &  # Start the Docker daemon in the background
-  - sleep 5  # Wait a few seconds for the Docker daemon to initialize
-  - echo "Docker daemon started"
-  - docker info  # Check if Docker daemon is running
-  - echo "Installing Docker CLI in the main container"
+  - echo "Setting up Kaniko"
+  - curl -LO https://github.com/GoogleContainerTools/kaniko/releases/download/v1.8.0/kaniko-linux-amd64
+  - chmod +x kaniko-linux-amd64
+  - mv kaniko-linux-amd64 /usr/local/bin/kaniko
+  - echo "Kaniko installed successfully"
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
@@ -54,17 +56,19 @@ build_and_test_and_deploy:
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
     - echo "Running check test and build"
     - make deps test build
-    - echo "Building Docker image"
-    - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
-    - docker build -t target-make-python-devex:latest -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project .
-    - echo "Pushing Docker image"
-    - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project:latest
+    - echo "Building Docker image with Kaniko"
+    - echo $DOCKER_PASSWORD | /usr/local/bin/kaniko login --username $DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY
+    - /usr/local/bin/kaniko build --context . --dockerfile Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+    - echo "Pushing Docker image with Kaniko"
+    - /usr/local/bin/kaniko push --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+    # - echo "Building Docker image"
+    # - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
+    # - docker build -t target-make-python-devex:latest -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project .
+    # - echo "Pushing Docker image"
+    # - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project:latest
 
   # artifacts:
   #   when: always
   #   paths:
   #     - dist/example-0.0.0-py3-none-any.whl  # Ensure the .whl file is uploaded as an artifact
   # expire_in: 1 day
-  variables:
-    DOCKER_USERNAME: $CI_REGISTRY_USER
-    DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
