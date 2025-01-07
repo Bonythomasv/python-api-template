@@ -4,9 +4,13 @@ stages:
 variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
+  DOCKER_DRIVER: overlay2
+
+# default:
+#   image: python:${PYTHON_VERSION}
 
 default:
-  image: python:${PYTHON_VERSION}
+  image: docker:latest  # Use Docker's official image with Docker support
 
 before_script:
   - echo "Checking if Homebrew is installed"
