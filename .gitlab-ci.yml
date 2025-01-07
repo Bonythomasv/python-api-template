@@ -5,8 +5,6 @@ stages:
 variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
   DOCKER_REGISTRY: "registry.infosec.it.ubc.ca"
   IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project"
   IMAGE_TAG: "latest"
@@ -14,11 +12,9 @@ variables:
   DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
 
 default:
-  image: python:${PYTHON_VERSION}
+  image: quay.io/podman/stable
 
-services:
-  - name: docker:19-dind
-    alias: docker
+services: []
 
 test:
   stage: test
@@ -63,19 +59,13 @@ test:
 
 build_and_push:
   stage: build_and_push
-  image: docker:19
-  services:
-    - name: docker:19-dind
-      alias: docker
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: "tcp://docker:2375"  # Explicitly set the Docker host
+  image: quay.io/podman/stable
   script:
-    # Authenticate with the Docker registry
-    - echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
+    # Authenticate with the container registry
+    - echo $DOCKER_PASSWORD | podman login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
 
-    # Build the Docker image
-    - docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    # Build the container image using Podman
+    - podman build -t $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
 
-    # Push the Docker image to the registry
-    - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+    # Push the container image to the registry
+    - podman push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
