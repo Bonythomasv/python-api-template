@@ -14,6 +14,8 @@ services:
   - docker:24-dind  # Enable Docker-in-Docker for Docker functionality
 
 before_script:
+  - echo "Starting Docker daemon"
+  - dockerd &  # Start the Docker daemon in the background
   - echo "Installing Docker CLI in the main container"
   - apt-get update && apt-get install -y docker.io || { echo "Failed to install Docker CLI"; exit 1; }
   - echo "Checking if Homebrew is installed"
