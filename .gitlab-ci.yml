@@ -20,6 +20,12 @@ services:
     entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
 
 before_script:
+  # Install Docker CLI if it's not already available
+  - if ! command -v docker &>/dev/null; then
+      echo "Docker not found, installing Docker CLI...";
+      apt-get update && apt-get install -y docker.io;
+    fi
+  - docker --version  # Verify Docker is available
   # Install Docker Buildx (if not already installed)
   - mkdir -p ~/.docker/cli-plugins
   - curl -Lo ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.9.1/buildx-v0.9.1.linux-amd64
@@ -45,6 +51,7 @@ before_script:
   - echo "Poetry installed and path set"
   - echo "Setting up alias for poetry"
   - alias poetry='/root/.local/bin/poetry'  # Create alias for Poetry
+  - until docker info; do echo "Waiting for Docker to be ready..."; sleep 5; done
 
 build_and_test_and_deploy:
   stage: build_and_test_and_deploy
