@@ -34,11 +34,8 @@ deps:
     - python3 -m venv ${VENV_DIR}
     - source ${VENV_DIR}/bin/activate
     - pip install --upgrade pip
-    - pip install poetry
-    - echo "Installing dependencies with Brew"
-    - brew bundle install --no-lock --verbose --file=Brewfile
     - echo "Installing dependencies with Makefile"
-    - make deps
+    - make deps || { echo "Makefile dependency installation failed"; exit 1; }
   artifacts:
     paths:
       - ${VENV_DIR}
@@ -49,18 +46,19 @@ check:
   script:
     - echo "Showing environment paths"
     - echo "${PATH}"
+    - python3 --version
     - command -v pyenv || true
     - command -v poetry || true
     - command -v python3 || true
     - echo "Running make check"
-    - make check
+    - make check || { echo "Make check failed"; exit 1; }
 
 test:
   stage: test
   script:
     - source ${VENV_DIR}/bin/activate
     - echo "Running tests"
-    - make test
+    - make test || { echo "Tests failed"; exit 1; }
   artifacts:
     when: always
     paths:
@@ -71,7 +69,7 @@ build:
   script:
     - source ${VENV_DIR}/bin/activate
     - echo "Building the project"
-    - make build
+    - make build || { echo "Build failed"; exit 1; }
   artifacts:
     paths:
       - dist/
@@ -80,12 +78,12 @@ build:
 docker:
   stage: docker
   script:
-    - echo "Logging into Docker registry"
-    - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - echo "Logging into Docker registry"s
+    - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
     - echo "Building Docker image"
-    - docker build -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project .
+    - docker build -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project . || { echo "Docker build failed"; exit 1; }
     - echo "Pushing Docker image"
-    - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project
+    - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project || { echo "Docker push failed"; exit 1; }
   only:
     - main
   variables:
