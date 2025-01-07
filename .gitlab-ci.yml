@@ -1,9 +1,6 @@
 stages:
-  - deps
-  - check
-  - test
-  - build
-  - docker
+  - build_and_test
+  - deploy
 
 variables:
   PYTHON_VERSION: "3.10"
@@ -26,12 +23,15 @@ before_script:
   - echo "Homebrew path setup completed"
   - echo "Installing python3-venv package"
   - apt-get update && apt-get install -y python3-venv || echo "Skipping python3-venv installation for non-root environment"
-  - echo "Ensuring Poetry is in PATH "
+  - echo "Ensuring Poetry is in PATH"
   - curl -sSL https://install.python-poetry.org | python3 -  # Install Poetry
-  - export PATH="/root/.local/bin:$PATH"  # Add Poetry to the PATH
+  - export PATH="$HOME/.local/bin:$PATH"  # Add Poetry to the PATH
+  - echo "Poetry installed and path set"
+  - echo "Setting up alias for poetry"
+  - alias poetry='/root/.local/bin/poetry'  # Create alias for Poetry
 
-deps:
-  stage: deps
+build_and_test:
+  stage: build_and_test
   script:
     - echo "Setting up environment"
     - python3 -m venv ${VENV_DIR}
@@ -39,59 +39,37 @@ deps:
     - pip install --upgrade pip
     - echo "Installing dependencies with Makefile"
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
-  artifacts:
-    paths:
-      - ${VENV_DIR}
-    expire_in: 1 day
 
-check:
-  stage: check
-  script:
     - echo "Showing environment paths"
     - echo "${PATH}"
     - python3 --version
     - command -v pyenv || true
-    - command -v poetry || true
+    - command -v poetry || echo "Poetry not found"
     - command -v python3 || true
     - echo "Running make check"
-    - export PATH="/root/.local/bin:$PATH"  # Ensure Poetry is in the PATH for the check stage
+    - export PATH="$HOME/.local/bin:$PATH"  # Ensure Poetry is in the PATH for the check stage
     - make check || { echo "Make check failed"; exit 1; }
 
-test:
-  stage: test
-  script:
-    - source ${VENV_DIR}/bin/activate
     - echo "Running tests"
-    - export PATH="/root/.local/bin:$PATH"  # Ensure Poetry is in the PATH for the check stage
     - make test || { echo "Tests failed"; exit 1; }
   artifacts:
     when: always
     paths:
       - tests/reports/
+    expire_in: 1 day
 
-build:
-  stage: build
+deploy:
+  stage: deploy
   script:
-    - source ${VENV_DIR}/bin/activate
     - echo "Building the project"
-    - export PATH="/root/.local/bin:$PATH"  # Ensure Poetry is in the PATH for the check stage
     - make build || { echo "Build failed"; exit 1; }
-  artifacts:
-    paths:
-      - dist/
-      - build/
 
-docker:
-  stage: docker
-  script:
-    - echo "Logging into Docker registry"s
+    - echo "Logging into Docker registry"
     - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
     - echo "Building Docker image"
     - docker build -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project . || { echo "Docker build failed"; exit 1; }
     - echo "Pushing Docker image"
     - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project || { echo "Docker push failed"; exit 1; }
-  # only:
-  #   - main
   variables:
     DOCKER_USERNAME: $CI_REGISTRY_USER
     DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
