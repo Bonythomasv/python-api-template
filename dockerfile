@@ -21,13 +21,15 @@ COPY example/ /app/example/
 COPY tests/ /app/tests/
 COPY .github/ /app/.github/
 
-# Install Python dependencies
+# Install Poetry and check version
 RUN pip install --no-cache-dir poetry \
-    && poetry install --no-dev
+    && poetry self update
+
+# Install Python dependencies (without dev dependencies)
+RUN poetry install --without dev
 
 # Expose the port if the application runs on a specific one
 EXPOSE 8000
 
 # Define the default command to run your application
-# CMD ["python3", "-m", "example"]
 CMD ["poetry", "run", "uvicorn", "example:app", "--reload", "--host", "0.0.0.0"]
