@@ -27,9 +27,8 @@ before_script:
   - echo "Installing python3-venv package"
   - apt-get update && apt-get install -y python3-venv || echo "Skipping python3-venv installation for non-root environment"
   - echo "Ensuring Poetry is in PATH"
+  - curl -sSL https://install.python-poetry.org | python3 -  # Install Poetry
   - export PATH="/root/.local/bin:$PATH"  # Add Poetry to the PATH
-  - echo "Setting up alias for poetry"
-  - alias poetry='/root/.local/bin/poetry'  # Create alias for Poetry
 
 deps:
   stage: deps
