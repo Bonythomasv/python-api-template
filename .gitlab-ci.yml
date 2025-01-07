@@ -11,16 +11,16 @@ default:
   image: python:${PYTHON_VERSION}
 
 services:
-  - docker:24-dind  # Enable Docker-in-Docker for Docker functionality
-
+  - name: docker:24-dind  # Enable Docker-in-Docker for Docker functionality
+    entrypoint: ["--host=unix:///var/run/docker.sock"]
 before_script:
+  - apt-get update && apt-get install -y docker.io || { echo "Failed to install Docker CLI"; exit 1; }
   - echo "Starting Docker daemon"
   - dockerd &  # Start the Docker daemon in the background
   - sleep 5  # Wait a few seconds for the Docker daemon to initialize
   - echo "Docker daemon started"
   - docker info  # Check if Docker daemon is running
   - echo "Installing Docker CLI in the main container"
-  - apt-get update && apt-get install -y docker.io || { echo "Failed to install Docker CLI"; exit 1; }
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
