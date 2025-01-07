@@ -20,11 +20,18 @@ default:
 #     entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
 
 before_script:
+  # Check system architecture
+  - echo "Checking system architecture"
+  - uname -m  # Output the system architecture (e.g., x86_64, arm64)
   # Install img (if not already installed)
   - echo "Installing img"
-  - curl -sSL https://github.com/genuinetools/img/releases/download/v0.8.0/img-linux-amd64 -o /usr/local/bin/img
-  - chmod +x /usr/local/bin/img
-  - img --version  # Verify img is installed
+  - curl -sSL https://github.com/genuinetools/img/releases/download/v0.8.0/img-linux-amd64 -o /usr/local/bin/img || { echo "Failed to download img"; exit 1; }
+  - ls -l /usr/local/bin/img  # Verify permissions
+  - file /usr/local/bin/img  # Check file type
+  - sha256sum /usr/local/bin/img  # Check checksum (optional, if you have the checksum)
+  - chmod +x /usr/local/bin/img || { echo "Failed to make img executable"; exit 1; }
+  - img --version || { echo "Failed to verify img installation"; exit 1; }
+
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
