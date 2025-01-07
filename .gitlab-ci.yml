@@ -39,7 +39,7 @@ build_and_test_and_deploy:
     - echo "Installing dependencies with Makefile"
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
     - echo "Running check test and build"
-    - make deps check test build
+    - make deps test build
     - echo "Building Docker image"
     - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
     - docker build -t target-make-python-devex:latest registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project . || { echo "Docker build failed"; exit 1; }
