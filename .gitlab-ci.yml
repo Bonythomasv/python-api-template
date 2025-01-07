@@ -17,7 +17,7 @@ default:
   image: python:${PYTHON_VERSION}
 
 services:
-  - name: docker:24-dind
+  - name: docker:19-dind
     alias: docker
 
 test:
@@ -36,6 +36,7 @@ test:
 
     # Verify Homebrew installation
     - brew --version
+
     # Set up Python environment
     - python3 -m venv ${VENV_DIR}
     - source ${VENV_DIR}/bin/activate
@@ -62,11 +63,13 @@ test:
 
 build_and_push:
   stage: build_and_push
-  image: docker:24
+  image: docker:19
   services:
-    - docker:24-dind
+    - name: docker:19-dind
+      alias: docker
   variables:
     DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker:2375"  # Explicitly set the Docker host
   script:
     # Authenticate with the Docker registry
     - echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
