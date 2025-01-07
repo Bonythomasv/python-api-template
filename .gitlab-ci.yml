@@ -64,5 +64,10 @@ build_and_push:
     name: gcr.io/kaniko-project/executor:latest
     entrypoint: ["/kaniko/executor"]
   script:
-    - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    # Debugging step: Print the environment and configuration
+    - echo "Starting Kaniko build process"
+    - echo "Contents of /kaniko/.docker/config.json:"
+    - cat /kaniko/.docker/config.json
+
+    # Kaniko build and push command
     - --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
