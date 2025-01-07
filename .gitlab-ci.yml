@@ -14,7 +14,7 @@ default:
 
 before_script:
   - echo "Checking if curl and bash are installed"
-  - apt-get update && apt-get install -y curl bash python3-venv || { echo "Failed to install curl, bash, or python3-venv"; exit 1; }
+  - apk update && apk add --no-cache curl bash python3 || { echo "Failed to install curl, bash, or python3"; exit 1; }
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
