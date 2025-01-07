@@ -40,6 +40,14 @@ test:
     - source ${VENV_DIR}/bin/activate
     - pip install --upgrade pip
 
+    # Install Poetry
+    - curl -sSL https://install.python-poetry.org | python3 -
+    - export PATH="/root/.local/bin:$PATH"  # Add Poetry to PATH
+
+    # Verify Poetry installation
+    - poetry --version
+    - poetry env use python3
+
     # Install dependencies with Makefile
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
     - make test || { echo "Tests failed"; exit 1; }
