@@ -8,20 +8,7 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies including debian-archive-keyring
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    gnupg \
-    debian-archive-keyring \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Update APT sources using the installed keyring
-RUN echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm main" > /etc/apt/sources.list \
-    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list \
-    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list
-
-# Install additional packages
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
