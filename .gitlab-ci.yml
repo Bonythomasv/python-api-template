@@ -18,40 +18,43 @@ services:
   - name: docker:24-dind
     alias: docker
 
-# Stage 1: Test and Build Python Package
 test:
   stage: test
   script:
+    # Install Homebrew
+    - if ! command -v brew &>/dev/null; then
+        echo "Installing Homebrew";
+        NON_ROOT_HOME="/home/linuxbrew";
+        mkdir -p $NON_ROOT_HOME && curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash;
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc;
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
+      fi
+    - export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+    - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+    # Verify Homebrew installation
+    - brew --version
+
     # Set up Python environment
     - python3 -m venv ${VENV_DIR}
     - source ${VENV_DIR}/bin/activate
     - pip install --upgrade pip
 
-    # Install dependencies and run tests
-    - echo "Installing dependencies with Makefile"
+    # Install dependencies with Makefile
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
-    - echo "Running tests"
     - make test || { echo "Tests failed"; exit 1; }
-
-    # Build Python package
-    - echo "Building package"
     - make build || { echo "Build failed"; exit 1; }
 
   artifacts:
     paths:
-      - .  # Include the project directory
       - dist/
     expire_in: 1 day
 
-# Stage 2: Build and Push Docker Image
 build_and_push:
   stage: build_and_push
   image:
     name: gcr.io/kaniko-project/executor:latest
     entrypoint: ["/kaniko/executor"]
   script:
-    # Set up Docker authentication for Kaniko
     - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > /kaniko/.docker/config.json
-
-    # Build and push the Docker image using Kaniko
     - --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
