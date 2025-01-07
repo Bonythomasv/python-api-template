@@ -23,6 +23,19 @@ services:
 test:
   stage: test
   script:
+    # Install Homebrew
+    - if ! command -v brew &>/dev/null; then
+        echo "Installing Homebrew";
+        NON_ROOT_HOME="/home/linuxbrew";
+        mkdir -p $NON_ROOT_HOME && curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash;
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc;
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
+      fi
+    - export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+    - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+    # Verify Homebrew installation
+    - brew --version
     # Set up Python environment
     - python3 -m venv ${VENV_DIR}
     - source ${VENV_DIR}/bin/activate
