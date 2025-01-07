@@ -25,6 +25,8 @@ before_script:
   - chmod +x kaniko-linux-amd64
   - mv kaniko-linux-amd64 /usr/local/bin/kaniko
   - echo "Kaniko installed successfully"
+  - echo "Verifying Kaniko installation"
+  - kaniko --version
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
