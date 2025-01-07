@@ -5,16 +5,15 @@ variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
   DOCKER_DRIVER: overlay2
-
-# default:
-#   image: python:${PYTHON_VERSION}
+  DOCKER_TLS_CERTDIR: ""
 
 default:
-  image: docker:24-dind  # Latest stable Docker DinD image
+  image: python:${PYTHON_VERSION}
+
+services:
+  - docker:24-dind  # Enable Docker-in-Docker for Docker functionality
 
 before_script:
-  - echo "Checking if curl and bash are installed"
-  - apk update && apk add --no-cache curl bash python3 || { echo "Failed to install curl, bash, or python3"; exit 1; }
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
@@ -50,7 +49,7 @@ build_and_test_and_deploy:
     - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
     - docker build -t target-make-python-devex:latest registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project . || { echo "Docker build failed"; exit 1; }
     - echo "Pushing Docker image"
-    - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project:latest || { echo "Docker push failed"; exit 1; }
+    - docker push §c   || { echo "Docker push failed"; exit 1; }
   # artifacts:
   #   when: always
   #   paths:
