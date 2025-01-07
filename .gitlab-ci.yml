@@ -58,7 +58,7 @@ before_script:
   - echo "Poetry installed and path set"
   - echo "Setting up alias for poetry"s
   - alias poetry='/root/.local/bin/poetry'  # Create alias for Poetry
-  - until docker info; do echo "Waiting for Docker to be ready..."; sleep 5; done
+  # - until docker info; do echo "Waiting for Docker to be ready..."; sleep 5; done
 
 build_and_test_and_deploy:
   stage: build_and_test_and_deploy
