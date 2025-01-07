@@ -5,8 +5,6 @@ stages:
 variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
   DOCKER_REGISTRY: "registry.infosec.it.ubc.ca"
   IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project"
   IMAGE_TAG: "latest"
@@ -16,13 +14,27 @@ variables:
 default:
   image: python:${PYTHON_VERSION}
 
-services:
-  - name: docker:24-dind
-    alias: docker
+# services:
+#   - name: docker:24-dind
+#     alias: docker
 
 test:
   stage: test
   script:
+    # Install Homebrew
+    - if ! command -v brew &>/dev/null; then
+        echo "Installing Homebrew";
+        NON_ROOT_HOME="/home/linuxbrew";
+        mkdir -p $NON_ROOT_HOME && curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash;
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc;
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
+      fi
+    - export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+    - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+    # Verify Homebrew installation
+    - brew --version
+
     # Set up Python environment
     - python3 -m venv ${VENV_DIR}
     - source ${VENV_DIR}/bin/activate
@@ -43,23 +55,19 @@ test:
 
   artifacts:
     paths:
-      - .
       - dist/
     expire_in: 1 day
 
 build_and_push:
   stage: build_and_push
-  image: docker:24
-  services:
-    - docker:24-dind
-  variables:
-    DOCKER_TLS_CERTDIR: ""
+  image:
+    name: gcr.io/kaniko-project/executor:latest
+    entrypoint: ["/kaniko/executor"]
   script:
-    # Authenticate with the Docker registry
-    - echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
+    # Debugging step: Print the environment and configuration
+    - echo "Starting Kaniko build process"
+    - echo "Contents of /kaniko/.docker/config.json:"
+    - cat /kaniko/.docker/config.json
 
-    # Build the Docker image
-    - docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
-
-    # Push the Docker image to the registry
-    - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+    # Kaniko build and push command
+    - --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
