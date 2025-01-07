@@ -74,7 +74,9 @@ build_and_test_and_deploy:
   # Login to Docker registry using img
     - echo $DOCKER_PASSWORD | /usr/local/bin/img login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin || { echo "img login failed"; exit 1; }
     # Build and push the Docker image with img
-    - /usr/local/bin/img build --tag $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG --push . || { echo "img build or push failed"; exit 1; }
+    - /usr/local/bin/img build --tag $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG . || { echo "img build failed"; exit 1; }
+    # Push the Docker image with img
+    - /usr/local/bin/img push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG || { echo "img push failed"; exit 1; }
     - echo "Docker image built and pushed successfully"
     # - echo "Building Docker image"
     # - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
