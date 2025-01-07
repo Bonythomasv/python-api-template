@@ -14,10 +14,10 @@ variables:
 default:
   image: python:${PYTHON_VERSION}
 
-# services:
-#   - name: docker:24-dind
-#     alias: docker
-#     entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
+services:
+  - name: docker:24-dind
+    alias: docker
+    entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
 
 before_script:
   # Check system architecture
