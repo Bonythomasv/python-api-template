@@ -12,6 +12,9 @@ default:
 
 services:
   - name: docker:24-dind  # Enable Docker-in-Docker for Docker functionality
+    entrypoint: ["dockerd-entrypoint.sh"]  # Ensure this is the default entrypoint for DinD
+    privileged: true  # Required for Docker-in-Docker to function properly
+
 before_script:
   - apt-get update && apt-get install -y docker.io || { echo "Failed to install Docker CLI"; exit 1; }
   - echo "Starting Docker daemon"
