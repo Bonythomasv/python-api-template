@@ -10,12 +10,11 @@ variables:
 #   image: python:${PYTHON_VERSION}
 
 default:
-  image: docker:latest  # Use Docker's official image with Docker support
+  image: docker:20.10.7  # Example Docker image with Docker pre-installed
 
 before_script:
-  # Install curl and bash if they are not already installed
   - echo "Checking if curl and bash are installed"
-  - apt-get update && apt-get install -y curl bash || { echo "Failed to install curl or bash"; exit 1; }
+  - apt-get update && apt-get install -y curl bash python3-venv || { echo "Failed to install curl, bash, or python3-venv"; exit 1; }
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
