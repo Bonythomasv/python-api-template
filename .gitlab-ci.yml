@@ -5,11 +5,6 @@ stages:
   - build
   - docker
 
-# # Define the agent to be used for the pipeline
-# gitlab-agent:
-#   name: "my-agent"
-#   environment: "non-prod"  # Optional: specify environment if needed
-
 variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
@@ -17,17 +12,21 @@ variables:
 default:
   image: python:${PYTHON_VERSION}
 
-
 before_script:
   - echo "Checking if Homebrew is installed"
-  - if ! command -v brew &>/dev/null; then echo "Installing Homebrew"; /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; fi
-  - export PATH="$HOMEBREW_PREFIX/bin:$PATH"
-  - eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
+  - if ! command -v brew &>/dev/null; then
+      echo "Installing Homebrew";
+      NON_ROOT_HOME="/home/linuxbrew";
+      mkdir -p $NON_ROOT_HOME && curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash;
+      echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc;
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
+    fi
+  - export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+  - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   - echo "Homebrew path setup completed"
   - echo "Installing python3-venv package"
-  - sudo apt-get update && sudo apt-get install -y python3-venv
+  - apt-get update && apt-get install -y python3-venv || echo "Skipping python3-venv installation for non-root environment"
 
-# Dependency installation stage
 deps:
   stage: deps
   script:
@@ -45,7 +44,6 @@ deps:
       - ${VENV_DIR}
     expire_in: 1 day
 
-# Show paths and environment
 check:
   stage: check
   script:
@@ -57,7 +55,6 @@ check:
     - echo "Running make check"
     - make check
 
-# Testing stage
 test:
   stage: test
   script:
@@ -69,7 +66,6 @@ test:
     paths:
       - tests/reports/
 
-# Build stage
 build:
   stage: build
   script:
@@ -81,7 +77,6 @@ build:
       - dist/
       - build/
 
-# Docker build and publish stage
 docker:
   stage: docker
   script:
