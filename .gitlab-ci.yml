@@ -1,5 +1,6 @@
 stages:
-  - build_and_test_and_deploy
+  - test
+  - build_and_push
 
 variables:
   PYTHON_VERSION: "3.10"
@@ -17,40 +18,40 @@ services:
   - name: docker:24-dind
     alias: docker
 
-before_script:
-  # Set up Python environment
-  - python3 --version
-  - apt-get update && apt-get install -y python3-venv || echo "Skipping python3-venv installation for non-root environment"
-  - python3 -m venv ${VENV_DIR}
-  - source ${VENV_DIR}/bin/activate
-  - pip install --upgrade pip
-  - curl -sSL https://install.python-poetry.org | python3 -
-  - export PATH="$HOME/.local/bin:$PATH"
+# Stage 1: Test and Build Python Package
+test:
+  stage: test
+  script:
+    # Set up Python environment
+    - python3 -m venv ${VENV_DIR}
+    - source ${VENV_DIR}/bin/activate
+    - pip install --upgrade pip
 
-build_and_test_and_deploy:
-  stage: build_and_test_and_deploy
+    # Install dependencies and run tests
+    - echo "Installing dependencies with Makefile"
+    - make deps || { echo "Makefile dependency installation failed"; exit 1; }
+    - echo "Running tests"
+    - make test || { echo "Tests failed"; exit 1; }
+
+    # Build Python package
+    - echo "Building package"
+    - make build || { echo "Build failed"; exit 1; }
+
+  artifacts:
+    paths:
+      - .  # Include the project directory
+      - dist/
+    expire_in: 1 day
+
+# Stage 2: Build and Push Docker Image
+build_and_push:
+  stage: build_and_push
   image:
     name: gcr.io/kaniko-project/executor:latest
     entrypoint: ["/kaniko/executor"]
   script:
-    # Install Python dependencies using Makefile
-    - echo "Installing dependencies with Makefile"
-    - python3 -m venv ${VENV_DIR}
-    - source ${VENV_DIR}/bin/activate
-    - make deps || { echo "Makefile dependency installation failed"; exit 1; }
-
-    # Run tests and build Python package
-    - echo "Running tests and building package"
-    - make deps test build
-
     # Set up Docker authentication for Kaniko
     - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > /kaniko/.docker/config.json
 
     # Build and push the Docker image using Kaniko
     - --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-
-  # artifacts:
-  #   when: always
-  #   paths:
-  #     - dist/example-0.0.0-py3-none-any.whl
-  #   expire_in: 1 day
