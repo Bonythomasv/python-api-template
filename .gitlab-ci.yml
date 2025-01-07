@@ -26,6 +26,8 @@ before_script:
   - echo "Homebrew path setup completed"
   - echo "Installing python3-venv package"
   - apt-get update && apt-get install -y python3-venv || echo "Skipping python3-venv installation for non-root environment"
+  - echo "Ensuring Poetry is in PATH"
+  - export PATH="/root/.local/bin:$PATH"  # Add Poetry to the PATH
 
 deps:
   stage: deps
