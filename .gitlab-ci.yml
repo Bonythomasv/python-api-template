@@ -10,7 +10,7 @@ variables:
 #   image: python:${PYTHON_VERSION}
 
 default:
-  image: docker:20.10.7  # Example Docker image with Docker pre-installed
+  image: docker:24-dind  # Latest stable Docker DinD image
 
 before_script:
   - echo "Checking if curl and bash are installed"
