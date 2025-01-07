@@ -11,7 +11,9 @@ default:
   image: python:${PYTHON_VERSION}
 
 services:
-  - name: docker:24-dind  # Enable Docker-in-Docker for Docker functionality
+  - name: docker:24-dind
+    alias: docker
+    entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
 
 before_script:
   - apt-get update && apt-get install -y docker.io || { echo "Failed to install Docker CLI"; exit 1; }
