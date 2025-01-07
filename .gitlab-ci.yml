@@ -4,13 +4,12 @@ stages:
 variables:
   PYTHON_VERSION: "3.10"
   VENV_DIR: ".venv"
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
   DOCKER_REGISTRY: "registry.infosec.it.ubc.ca"
   IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project"
   IMAGE_TAG: "latest"
   DOCKER_USERNAME: $CI_REGISTRY_USER
   DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
+
 default:
   image: python:${PYTHON_VERSION}
 
@@ -20,72 +19,41 @@ services:
     entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
 
 before_script:
-  # Check system architecture
   - echo "Checking system architecture"
-  - uname -m  # Output the system architecture (e.g., x86_64, arm64)
+  - uname -m
 
-  # Install img (if not already installed)
-  - echo "Installing img"
-  - curl -sSL https://github.com/genuinetools/img/releases/download/v0.5.11/img-linux-amd64 -o /usr/local/bin/img || { echo "Failed to download img"; exit 1; }
+  # Verify Python environment
+  - python3 --version
+  - apt-get update && apt-get install -y python3-venv
+  - python3 -m venv ${VENV_DIR}
+  - source ${VENV_DIR}/bin/activate
+  - pip install --upgrade pip
 
-  # Verify the downloaded file
-  - ls -l /usr/local/bin/img  # Verify permissions and file existence
-  - file /usr/local/bin/img   # Check the file type
-  - sha256sum /usr/local/bin/img  # Check checksum (optional; only if you have the expected checksum)
-
-  # Make the binary executable
-  - chmod +x /usr/local/bin/img || { echo "Failed to make img executable"; exit 1; }
-
-  # Verify the installation
-  - img --version || { echo "Failed to verify img installation"; exit 1; }
-
-  - echo "Checking if Homebrew is installed"
-  - if ! command -v brew &>/dev/null; then
-      echo "Installing Homebrew";
-      NON_ROOT_HOME="/home/linuxbrew";
-      mkdir -p $NON_ROOT_HOME && curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash;
-      echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc;
-      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
-    fi
-  - export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
-  - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  - echo "Homebrew path setup completed"
-  - echo "Installing python3-venv package"
-  - apt-get update && apt-get install -y python3-venv || echo "Skipping python3-venv installation for non-root environment"
-  - echo "Ensuring Poetry is in PATH"
-  - curl -sSL https://install.python-poetry.org | python3 -  # Install Poetry
-  - export PATH="$HOME/.local/bin:$PATH"  # Add Poetry to the PATH
-  - echo "Poetry installed and path set"
-  - echo "Setting up alias for poetry"s
-  - alias poetry='/root/.local/bin/poetry'  # Create alias for Poetry
-  # - until docker info; do echo "Waiting for Docker to be ready..."; sleep 5; done
+  # Install Poetry (dependency management)
+  - curl -sSL https://install.python-poetry.org | python3 -
+  - export PATH="$HOME/.local/bin:$PATH"
 
 build_and_test_and_deploy:
   stage: build_and_test_and_deploy
+  image:
+    name: gcr.io/kaniko-project/executor:latest
+    entrypoint: [""]
   script:
-    - echo "Setting up environment"
-    - python3 -m venv ${VENV_DIR}
-    - source ${VENV_DIR}/bin/activate
-    - pip install --upgrade pip
-    - echo "Installing dependencies with Makefile"
+    # Install dependencies
+    - echo "Installing dependencies"
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
-    - echo "Running check test and build"
-    - make deps test build
-  # Login to Docker registry using img
-    - echo $DOCKER_PASSWORD | /usr/local/bin/img login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin || { echo "img login failed"; exit 1; }
-    # Build and push the Docker image with img
-    - /usr/local/bin/img build --tag $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG . || { echo "img build failed"; exit 1; }
-    # Push the Docker image with img
-    - /usr/local/bin/img push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG || { echo "img push failed"; exit 1; }
-    - echo "Docker image built and pushed successfully"
-    # - echo "Building Docker image"
-    # - docker login registry.infosec.it.ubc.ca -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || { echo "Docker login failed"; exit 1; }
-    # - docker build -t target-make-python-devex:latest -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project .
-    # - echo "Pushing Docker image"
-    # - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project:latest
 
-  # artifacts:
-  #   when: always
-  #   paths:
-  #     - dist/example-0.0.0-py3-none-any.whl  # Ensure the .whl file is uploaded as an artifact
-  # expire_in: 1 day
+    # Set up Kaniko authentication
+    - echo "Setting up Docker authentication for Kaniko"
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > /kaniko/.docker/config.json
+
+    # Build and push the Docker image using Kaniko
+    - echo "Building and pushing Docker image with Kaniko"
+    - /kaniko/executor --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG || { echo "Kaniko build or push failed"; exit 1; }
+
+  artifacts:
+    when: always
+    paths:
+      - dist/example-0.0.0-py3-none-any.whl
+    expire_in: 1 day
