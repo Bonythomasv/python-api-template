@@ -53,6 +53,7 @@ check:
     - command -v poetry || true
     - command -v python3 || true
     - echo "Running make check"
+    - export PATH="/root/.local/bin:$PATH"  # Ensure Poetry is in the PATH for the check stage
     - make check || { echo "Make check failed"; exit 1; }
 
 test:
@@ -60,6 +61,7 @@ test:
   script:
     - source ${VENV_DIR}/bin/activate
     - echo "Running tests"
+    - export PATH="/root/.local/bin:$PATH"  # Ensure Poetry is in the PATH for the check stage
     - make test || { echo "Tests failed"; exit 1; }
   artifacts:
     when: always
@@ -71,6 +73,7 @@ build:
   script:
     - source ${VENV_DIR}/bin/activate
     - echo "Building the project"
+    - export PATH="/root/.local/bin:$PATH"  # Ensure Poetry is in the PATH for the check stage
     - make build || { echo "Build failed"; exit 1; }
   artifacts:
     paths:
@@ -86,8 +89,8 @@ docker:
     - docker build -t registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project . || { echo "Docker build failed"; exit 1; }
     - echo "Pushing Docker image"
     - docker push registry.infosec.it.ubc.ca/ubc/cybersecurity/services/ciso/itsa-test-project || { echo "Docker push failed"; exit 1; }
-  only:
-    - main
+  # only:
+  #   - main
   variables:
     DOCKER_USERNAME: $CI_REGISTRY_USER
     DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
