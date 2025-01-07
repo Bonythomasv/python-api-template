@@ -8,15 +8,22 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies including debian-archive-keyring
+# Install system dependencies including gnupg
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     gnupg \
-    debian-archive-keyring \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Update APT sources using the installed keyring
+# Add the missing Debian GPG keys (with checks)
+RUN if [ ! -f /usr/share/keyrings/debian-archive-keyring.gpg ]; then \
+      curl -fsSL https://ftp-master.debian.org/keys/archive-key-12.asc | gpg --batch --no-tty --dearmor -o /usr/share/keyrings/debian-archive-keyring.gpg; \
+    fi \
+    && if [ ! -f /usr/share/keyrings/debian-archive-keyring-13.gpg ]; then \
+      curl -fsSL https://ftp-master.debian.org/keys/archive-key-13.asc | gpg --batch --no-tty --dearmor -o /usr/share/keyrings/debian-archive-keyring-13.gpg; \
+    fi
+
+# Update APT sources with the new GPG keys
 RUN echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm main" > /etc/apt/sources.list \
     && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list \
     && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list
