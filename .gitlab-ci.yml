@@ -52,8 +52,8 @@ build_and_test_and_deploy:
     - echo "Building and pushing Docker image with Kaniko"
     - /kaniko/executor --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG || { echo "Kaniko build or push failed"; exit 1; }
 
-  artifacts:
-    when: always
-    paths:
-      - dist/example-0.0.0-py3-none-any.whl
-    expire_in: 1 day
+  # artifacts:
+  #   when: always
+  #   paths:
+  #     - dist/example-0.0.0-py3-none-any.whl
+  #   expire_in: 1 day
