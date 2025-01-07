@@ -21,12 +21,14 @@ default:
 
 before_script:
   - echo "Setting up Kaniko"
+  # Install curl if it's not already available in the Python container
+  - apt-get update && apt-get install -y curl
   - curl -LO https://github.com/GoogleContainerTools/kaniko/releases/download/v1.8.0/kaniko-linux-amd64
   - chmod +x kaniko-linux-amd64
   - mv kaniko-linux-amd64 /usr/local/bin/kaniko
   - echo "Kaniko installed successfully"
   - echo "Verifying Kaniko installation"
-  - kaniko --version
+  - /usr/local/bin/kaniko --version  # Ensure Kaniko is installed and working
   - echo "Checking if Homebrew is installed"
   - if ! command -v brew &>/dev/null; then
       echo "Installing Homebrew";
