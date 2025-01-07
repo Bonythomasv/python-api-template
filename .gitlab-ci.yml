@@ -16,41 +16,27 @@ default:
 services:
   - name: docker:24-dind
     alias: docker
-    entrypoint: ["/bin/sh", "-c", "while :; do sleep 10; done"]
 
 before_script:
-  # Check system architecture
-  - echo "Checking system architecture"
-  - uname -m  # Output the system architecture (e.g., x86_64, arm64)
-
-  # Install Python dependencies and setup virtual environment
-  - echo "Setting up Python environment"
+  # Set up Python environment
   - python3 --version
   - apt-get update && apt-get install -y python3-venv || echo "Skipping python3-venv installation for non-root environment"
   - python3 -m venv ${VENV_DIR}
   - source ${VENV_DIR}/bin/activate
   - pip install --upgrade pip
-
-  # Install Poetry for Python dependency management
-  - echo "Installing Poetry"
   - curl -sSL https://install.python-poetry.org | python3 -
   - export PATH="$HOME/.local/bin:$PATH"
-  - echo "Poetry installed and path set"
 
 build_and_test_and_deploy:
   stage: build_and_test_and_deploy
   image:
     name: gcr.io/kaniko-project/executor:latest
-    entrypoint: [""]
+    entrypoint: ["/kaniko/executor"]
   script:
-    # Set up Python environment
-    - echo "Setting up virtual environment"
+    # Install Python dependencies using Makefile
+    - echo "Installing dependencies with Makefile"
     - python3 -m venv ${VENV_DIR}
     - source ${VENV_DIR}/bin/activate
-    - pip install --upgrade pip
-
-    # Install dependencies using Makefile
-    - echo "Installing dependencies with Makefile"
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
 
     # Run tests and build Python package
@@ -58,16 +44,13 @@ build_and_test_and_deploy:
     - make deps test build
 
     # Set up Docker authentication for Kaniko
-    - echo "Setting up Docker authentication for Kaniko"
-    - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > /kaniko/.docker/config.json
 
-    # Build and push Docker image using Kaniko
-    - echo "Building and pushing Docker image with Kaniko"
-    - /kaniko/executor --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG || { echo "Kaniko build failed"; exit 1; }
+    # Build and push the Docker image using Kaniko
+    - --context . --dockerfile ./Dockerfile --destination $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
   # artifacts:
   #   when: always
   #   paths:
-  #     - dist/example-0.0.0-py3-none-any.whl  # Ensure the .whl file is uploaded as an artifact
+  #     - dist/example-0.0.0-py3-none-any.whl
   #   expire_in: 1 day
