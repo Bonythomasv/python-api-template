@@ -12,7 +12,9 @@ variables:
   DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
 
 default:
-  image: python:${PYTHON_VERSION}
+  image: quay.io/podman/stable
+
+services: []
 
 test:
   stage: test
