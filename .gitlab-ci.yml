@@ -23,13 +23,20 @@ before_script:
   # Check system architecture
   - echo "Checking system architecture"
   - uname -m  # Output the system architecture (e.g., x86_64, arm64)
+
   # Install img (if not already installed)
   - echo "Installing img"
-  - curl -sSL https://github.com/genuinetools/img/releases/download/v0.8.0/img-linux-amd64 -o /usr/local/bin/img || { echo "Failed to download img"; exit 1; }
-  - ls -l /usr/local/bin/img  # Verify permissions
-  - file /usr/local/bin/img  # Check file type
-  - sha256sum /usr/local/bin/img  # Check checksum (optional, if you have the checksum)
+  - curl -sSL https://github.com/genuinetools/img/releases/download/v0.5.11/img-linux-amd64 -o /usr/local/bin/img || { echo "Failed to download img"; exit 1; }
+
+  # Verify the downloaded file
+  - ls -l /usr/local/bin/img  # Verify permissions and file existence
+  - file /usr/local/bin/img   # Check the file type
+  - sha256sum /usr/local/bin/img  # Check checksum (optional; only if you have the expected checksum)
+
+  # Make the binary executable
   - chmod +x /usr/local/bin/img || { echo "Failed to make img executable"; exit 1; }
+
+  # Verify the installation
   - img --version || { echo "Failed to verify img installation"; exit 1; }
 
   - echo "Checking if Homebrew is installed"
