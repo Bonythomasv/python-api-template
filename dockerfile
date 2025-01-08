@@ -1,5 +1,5 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use a pre-release Python runtime as a parent image
+FROM python:3.13-slim
 
 # Set environment variables to ensure Python runs in an unbuffered mode and doesn't create .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
