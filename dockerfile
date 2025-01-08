@@ -8,9 +8,21 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory in the container
 WORKDIR /app
 
-# Install runtime dependencies only
-RUN apt-get update && apt-get install -y \
+# Install runtime dependencies including the debian-archive-keyring package
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    gnupg \
+    debian-archive-keyring \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Update APT sources with the installed keyring
+RUN echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm main" > /etc/apt/sources.list \
+    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list \
+    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list
+
+# Install additional runtime dependencies if needed
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy the pre-built .whl file into the container
