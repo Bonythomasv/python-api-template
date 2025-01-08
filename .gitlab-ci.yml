@@ -66,9 +66,6 @@ build_and_push:
   tags:
     - docker-in-docker # this forces the CI job to on the dedicated DinD runner
   image: docker:20.10  # Use a Docker image with Docker CLI preinstalled
-  # services:
-  #   - name: docker:19-dind
-  #     alias: docker
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: "tcp://docker:2375"  # Explicitly set the Docker host
