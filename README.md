@@ -1,5 +1,4 @@
 Here’s a reformatted and modified version of the README file, with clearer instructions for developers on how to build, test, lint, and deploy the code:
-
 ---
 
 # Example Repo for Make Python DevEx
