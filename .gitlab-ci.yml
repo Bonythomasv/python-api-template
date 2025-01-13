@@ -8,10 +8,10 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
   DOCKER_REGISTRY: "registry.infosec.it.ubc.ca"
-  IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project"
-  IMAGE_TAG: "latest"
   DOCKER_USERNAME: $CI_REGISTRY_USER
   DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
+  IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project/make-python-devex-bt"
+  IMAGE_TAG: "latest"
 
 default:
   image: python:${PYTHON_VERSION}
@@ -71,10 +71,10 @@ build_and_push:
   #   DOCKER_HOST: "tcp://docker:2375"  # Explicitly set the Docker host
   script:
     # Authenticate with the Docker registry
-    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USERNAME --password-stdin
+    - echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
 
     # Build the Docker image
-    - docker build -t $CI_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    - docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
 
     # Push the Docker image to the registry
-    - docker push $CI_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+    - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
