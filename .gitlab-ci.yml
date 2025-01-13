@@ -16,9 +16,9 @@ variables:
 default:
   image: python:${PYTHON_VERSION}
 
-# services:
-#   - name: docker:19-dind
-#     alias: docker
+services:
+  - name: docker:19-dind
+    alias: docker
 
 test:
   stage: test
