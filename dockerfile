@@ -16,7 +16,7 @@ WORKDIR /app
 COPY dist/*.whl /app/
 
 # Install the pre-built .whl file dynamically
-RUN pip install --no-cache-dir --progress-bar off /app/*.whl
+RUN pip install --no-cache-dir --root-user-action=ignore --progress-bar off /app/*.whl
 
 # Debug Python version (optional)
 RUN python --version && pip --version
