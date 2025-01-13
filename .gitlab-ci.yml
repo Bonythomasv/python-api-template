@@ -16,24 +16,25 @@ variables:
 default:
   image: python:${PYTHON_VERSION}
 
-services:
-  - name: docker:19-dind
-    alias: docker
+# services:
+#   - name: docker:19-dind
+#     alias: docker
 
 test:
   stage: test
   script:
-    # Install Homebrew
-    # - if ! command -v brew &>/dev/null; then
-    #     echo "Installing Homebrew";
-    #     NON_ROOT_HOME="/home/linuxbrew";
-    #     mkdir -p $NON_ROOT_HOME && curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash;
-    #     echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc;
-    #     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
-    #   fi
-    - make install-homebrew
+    # Check if Homebrew is installed as non root user; if not, install it using Makefile
+    - if ! command -v brew &>/dev/null; then
+        echo "Homebrew not found. Installing with Makefile...";
+        make install-homebrew;
+      else
+        echo "Homebrew is already installed.";
+      fi
+
+    # Verify Homebrew installation for non root user
     - export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
     - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    - brew --version
 
     # Verify Homebrew installation
     - brew --version

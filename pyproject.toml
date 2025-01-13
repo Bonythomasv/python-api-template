@@ -4,9 +4,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "example"
-version = "0.0.0"
+version = "0.0.1"
 description = "This is a demonstration of the Make Python Devex concept project"
-authors = ["Colin Dean <c.o.l.i.n.d.e.a.n@example.com>"]
+authors = ["Bony Thomas"]
 license = "CC0"
 readme = "README.md"
 

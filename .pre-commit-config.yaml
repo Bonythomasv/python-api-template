@@ -35,13 +35,13 @@ repos:
     hooks:
     - id: checkmake
 
-  # Ensure version in repo remains 0.0.0 so version can be set through git tags
-  - repo: local
-    hooks:
-      - id: poetry-version-resetter
-        name: Reset Poetry Project Version to 0.0.0
-        entry: "make poetry-set-version ARTIFACT_VERSION=0.0.0"
-        language: system
-        files: pyproject.toml
-        pass_filenames: false
-        verbose: true
+  # # Ensure version in repo remains 0.0.0 so version can be set through git tags
+  # - repo: local
+  #   hooks:
+  #     - id: poetry-version-resetter
+  #       name: Reset Poetry Project Version to 0.0.0
+  #       entry: "make poetry-set-version ARTIFACT_VERSION=0.0.0"
+  #       language: system
+  #       files: pyproject.toml
+  #       pass_filenames: false
+  #       verbose: true
