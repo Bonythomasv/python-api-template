@@ -71,10 +71,10 @@ build_and_push:
   #   DOCKER_HOST: "tcp://docker:2375"  # Explicitly set the Docker host
   script:
     # Authenticate with the Docker registry
-    - echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USERNAME --password-stdin
 
     # Build the Docker image
-    - docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    - docker build -t $CI_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
 
     # Push the Docker image to the registry
-    - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+    - docker push $CI_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
