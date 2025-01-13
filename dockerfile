@@ -13,10 +13,10 @@ ENV OPENBLAS_NUM_THREADS=1
 WORKDIR /app
 
 # Copy the pre-built .whl file into the container
-COPY dist/example-0.0.0-py3-none-any.whl /app/
+COPY dist/*.whl /app/
 
-# Install the pre-built .whl file
-RUN pip install --no-cache-dir --progress-bar off /app/example-0.0.0-py3-none-any.whl
+# Install the pre-built .whl file dynamically
+RUN pip install --no-cache-dir --progress-bar off /app/*.whl
 
 # Debug Python version (optional)
 RUN python --version && pip --version
