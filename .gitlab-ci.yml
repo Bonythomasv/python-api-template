@@ -59,8 +59,6 @@ test:
 
 build_and_push:
   stage: build_and_push
-  tags:
-    - podman  # Ensure the runner supports Podman
   image: registry.access.redhat.com/ubi8/podman:latest
   script:
     # Generate a unique version for the image
