@@ -1,6 +1,7 @@
 stages:
   - test
   - build_and_push
+  - deploy
 
 variables:
   PYTHON_VERSION: "3.10"
@@ -11,7 +12,8 @@ variables:
   DOCKER_USERNAME: $CI_REGISTRY_USER
   DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
   IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project/make-python-devex-bt"
-  IMAGE_TAG: "latest"
+  BIND_PORT: "8080"               # Define the port to bind on the host for docker container
+
 
 default:
   image: python:${PYTHON_VERSION}
