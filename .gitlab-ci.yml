@@ -75,13 +75,16 @@ build_and_push:
     # Generate unique artifact version based on commit hash and pipeline ID
     - export COMMIT_ID=$(echo $CI_COMMIT_SHORT_SHA)
     - export PIPELINE_ID=$(echo $CI_PIPELINE_ID)
-    - export BUILD_VERSION="0.0.0-${COMMIT_ID}-${PIPELINE_ID}"
+    - export IMAGE_TAG="0.0.0-${COMMIT_ID}-${PIPELINE_ID}"
 
-    # Save build metadata
-    - mkdir -p .build_metadata
-    - echo "COMMIT_ID=$COMMIT_ID" > .build_metadata/build_info.txt
-    - echo "PIPELINE_ID=$PIPELINE_ID" >> .build_metadata/build_info.txt
-    - echo "BUILD_VERSION=$BUILD_VERSION" >> .build_metadata/build_info.txt
+    # Save the build version as a CI/CD variable
+    - echo "IMAGE_TAG=$IMAGE_TAG" > build_version.txt
+
+    # # Save build metadata
+    # - mkdir -p .build_metadata
+    # - echo "COMMIT_ID=$COMMIT_ID" > .build_metadata/build_info.txt
+    # - echo "PIPELINE_ID=$PIPELINE_ID" >> .build_metadata/build_info.txt
+    # - echo "BUILD_VERSION=$BUILD_VERSION" >> .build_metadata/build_info.txt
 
     # Adjust the image tag
     - export IMAGE_TAG=$BUILD_VERSION
@@ -94,35 +97,31 @@ build_and_push:
 
     # Push the Docker image to the registry
     - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+  artifacts:
+    paths:
+      - build_version.txt
+    expire_in: 1 day
 
-# deploy:
-#   stage: deploy
-#   tags:
-#     - ssh  # Ensure the runner can SSH into the target VM
-#   script:
-#     # Variables for the target VM
-#     - export VM_USER="your-vm-user"
-#     - export VM_HOST="your-vm-ip"
-#     - export SSH_KEY="/path/to/ssh/private/key" # Add to CI/CD variables for security
+deploy:
+  stage: deploy
+  before_script:
+    # Set up SSH for deployment
+    - mkdir -p ~/.ssh
+    - echo "$PRIVATE_KEY_dev_spielplatz_Server" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
 
-#     # Copy SSH key for authentication
-#     - mkdir -p ~/.ssh
-#     - echo "$SSH_KEY" > ~/.ssh/id_rsa
-#     - chmod 600 ~/.ssh/id_rsa
+    # Add the target VM to known_hosts to prevent interactive prompts
+    - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts
 
-#     # Deploy the Docker container to the VM
-#     - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST << EOF
-#         echo "Authenticating Docker on the target VM...";
-#         echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin;
+  script:
+    # Load the build version
+    - export IMAGE_TAG=$(cat build_version.txt)
 
-#         echo "Pulling the Docker image...";
-#         docker pull $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG;
+    # Export necessary variables for the deployment script
+    - export DOCKER_USERNAME=$CI_REGISTRY_USER
+    - export DOCKER_PASSWORD=$CI_REGISTRY_PASSWORD
 
-#         echo "Stopping any running container...";
-#         docker stop make-python-devex || true;
-#         docker rm make-python-devex || true;
-
-#         echo "Starting a new container...";
-#         docker run -d --name make-python-devex -p 8080:8000 $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG;
-#         echo "Deployment completed.";
-#     EOF
+    # Run deploy.sh on the target VM with the required parameters
+    - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash -s" < deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD
