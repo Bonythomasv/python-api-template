@@ -118,6 +118,9 @@ deploy:
     # Load the build version
     - export IMAGE_TAG=$(cat build_version.txt)
 
+    # Debugging variables
+    - echo "$IMAGE_TAG"
+
     # Export necessary variables for the deployment script
     - export DOCKER_USERNAME=$CI_REGISTRY_USER
     - export DOCKER_PASSWORD=$CI_REGISTRY_PASSWORD
