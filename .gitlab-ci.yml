@@ -122,7 +122,7 @@ deploy:
     - export DOCKER_USERNAME=$CI_REGISTRY_USER
     - export DOCKER_PASSWORD=$CI_REGISTRY_PASSWORD
 
-    # Debug: Print variables being passed
+    # Debug Print variables being passed
     - echo "DEBUG: IMAGE_TAG = $IMAGE_TAG"
     - echo "DEBUG: BIND_PORT = $BIND_PORT"
     - echo "DEBUG: DOCKER_USERNAME = $DOCKER_USERNAME"
