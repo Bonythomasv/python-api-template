@@ -115,7 +115,7 @@ deploy:
     - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts
 
   script:
-    - IMAGE_TAG=$(cat build_version.txt)  # Load the build version
+    - export IMAGE_TAG=$(cat build_version.txt) # Load the build version
     - echo "DEBUG: IMAGE_TAG = $IMAGE_TAG"  # Debug output
     - echo "DEBUG: BIND_PORT = $BIND_PORT"
     - echo "DEBUG: DOCKER_USERNAME = $CI_REGISTRY_USER"
