@@ -88,9 +88,6 @@ build_and_push:
     # - echo "PIPELINE_ID=$PIPELINE_ID" >> .build_metadata/build_info.txt
     # - echo "BUILD_VERSION=$BUILD_VERSION" >> .build_metadata/build_info.txt
 
-    # Adjust the image tag
-    - export IMAGE_TAG=$BUILD_VERSION
-
     # Authenticate with the Docker registry
     - echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
 
