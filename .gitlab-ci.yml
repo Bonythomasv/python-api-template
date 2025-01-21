@@ -120,6 +120,9 @@ deploy:
 
     # Debugging variables
     - echo "$IMAGE_TAG"
+    - echo "$BIND_PORT"
+    - echo "$DOCKER_USERNAME"
+    - echo "$DOCKER_PASSWORD"
 
     # Export necessary variables for the deployment script
     - export DOCKER_USERNAME=$CI_REGISTRY_USER
