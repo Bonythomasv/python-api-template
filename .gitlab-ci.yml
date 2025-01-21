@@ -118,7 +118,7 @@ deploy:
     - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts
 
   script:
-
+    - echo "Deploying the Docker container to the target VM..."
     # Export necessary variables for the deployment script
     - export DOCKER_USERNAME=$CI_REGISTRY_USER
     - export DOCKER_PASSWORD=$CI_REGISTRY_PASSWORD
