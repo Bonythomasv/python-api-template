@@ -129,4 +129,5 @@ deploy:
     - export DOCKER_PASSWORD=$CI_REGISTRY_PASSWORD
 
     # Run deploy.sh on the target VM with the required parameters
-    - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
+    # - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
+    - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 8000 bthoma02 glpat-AhYv5xkKPWKSGGBSpGQ8
