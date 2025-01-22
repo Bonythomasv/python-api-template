@@ -141,12 +141,21 @@ build_and_push:
 deploy-with-docker-api:
   stage: deploy-with-docker-api
   tags:
-    - docker-in-docker # this forces the CI job to on the dedicated DinD runner
+    - docker-in-docker # this forces the CI job to run on the dedicated DinD runner
   image: docker:20.10
   variables:
     DOCKER_HOST: tcp://10.93.46.34:8080  # Remote Docker API
   script:
-    # Test connectivity to the remote Docker daemon
+    # Debugging: Test basic connectivity to the target server
+    - echo "Testing connectivity to 10.93.46.34"
+    - apk add --no-cache iputils bind-tools curl net-tools
+    - ping -c 4 10.93.46.34 || echo "Ping to 10.93.46.34 failed"
+    - curl -v http://10.93.46.34:8080/version || echo "Docker API endpoint /version failed"
+    - echo "Environment Variables:"
+    - env | sort
+
+    # Test connectivity to the Docker daemon
+    - echo "Testing connection to Docker daemon via DOCKER_HOST=$DOCKER_HOST"
     - docker info
 
     # Load the build version
