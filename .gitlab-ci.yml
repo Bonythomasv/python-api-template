@@ -116,7 +116,9 @@ deploy:
     - ssh-add ~/.ssh/id_rsa
 
     # Add the target VM to known_hosts to prevent interactive prompts
-    - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts
+    - echo "Testing ssh-keyscan"
+    - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"
+    - cat ~/.ssh/known_hosts
 
   script:
     - echo "Deploying the Docker container to the target VM..."
@@ -134,8 +136,8 @@ deploy:
     - env | sort
 
     # Run deploy.sh on the target VM with the required parameters
-    - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
-    # - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 8000 bthoma02 glpat-AhYv5xkKPWKSGGBSpGQ8"
+    # - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
+    - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 8000 bthoma02 glpat-AhYv5xkKPWKSGGBSpGQ8"
 
 
 # deploy-with-docker-api:
