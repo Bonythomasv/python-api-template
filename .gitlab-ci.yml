@@ -140,7 +140,7 @@ deploy:
   stage: deploy
   image: docker:20.10
   variables:
-    DOCKER_HOST: tcp://10.93.46.34:2375  # Replace <vm-ip> with your VM's IP address
+    DOCKER_HOST: tcp://10.93.46.34:8080  # Replace <vm-ip> with your VM's IP address
   script:
     # Load the build version
     - export IMAGE_TAG=$(cat build_version.txt)
