@@ -140,12 +140,21 @@ deploy:
   stage: deploy
   image: docker:20.10
   variables:
-    DOCKER_HOST: tcp://10.93.46.34:8080  # Replace <vm-ip> with your VM's IP address
+    DOCKER_HOST: tcp://10.93.46.34:8080  # Remote Docker API
   script:
+    # Test connectivity to the remote Docker daemon
+    - docker info
+
     # Load the build version
     - export IMAGE_TAG=$(cat build_version.txt)
+
+    # Authenticate with the Docker registry
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $DOCKER_REGISTRY
+
+    # Pull the Docker image
     - docker pull $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+
+    # Run the container on the remote host
     - docker stop make-python-devex-bt || true
     - docker rm make-python-devex-bt || true
     - docker run -d --name make-python-devex-bt -p $BIND_PORT:8000 $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
