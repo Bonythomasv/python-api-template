@@ -137,7 +137,7 @@ deploy:
 
     # Run deploy.sh on the target VM with the required parameters
     # - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
-    - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 $BIND_PORT $SSHKP_USERNAME $SSHKP_PASSWORD"
+    - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG 8000 $SSHKP_USERNAME $SSHKP_PASSWORD"
     # - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 8000 bthoma02 glpat-AhYv5xkKPWKSGGBSpGQ8"
 
 
