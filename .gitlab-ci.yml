@@ -102,44 +102,46 @@ build_and_push:
       - build_version.txt
     expire_in: 1 day
 
-deploy:
-  stage: deploy
-  tags:
-    - docker-in-docker # this forces the CI job to on the dedicated DinD runner
-  image: docker:20.10  # Use a Docker image with Docker CLI preinstalled
-  before_script:
-    # Set up SSH for deployment
-    - mkdir -p ~/.ssh
-    - echo "$PRIVATE_KEY_dev_spielplatz_Server" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - eval "$(ssh-agent -s)"
-    - ssh-add ~/.ssh/id_rsa
+# deploy:
+#   stage: deploy
+#   tags:
+#     - docker-in-docker # this forces the CI job to on the dedicated DinD runner
+#   image: docker:20.10  # Use a Docker image with Docker CLI preinstalled
+#   before_script:
+#     # Set up SSH for deployment
+#     - mkdir -p ~/.ssh
+#     - echo "$PRIVATE_KEY_dev_spielplatz_Server" | tr -d '\r' > ~/.ssh/id_rsa
+#     - chmod 600 ~/.ssh/id_rsa
+#     - eval "$(ssh-agent -s)"
+#     - ssh-add ~/.ssh/id_rsa
 
-    # Add the target VM to known_hosts to prevent interactive prompts
-    - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts
+#     # Add the target VM to known_hosts to prevent interactive prompts
+#     - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts
 
-  script:
-    - echo "Deploying the Docker container to the target VM..."
-    # # Export necessary variables for the deployment script
-    # - export DOCKER_USERNAME=$SSHKP_USERNAME
-    # - export DOCKER_PASSWORD=$SSHKP_PASSWORD
-    # Load the build version
-    - export IMAGE_TAG=$(cat build_version.txt)
+#   script:
+#     - echo "Deploying the Docker container to the target VM..."
+#     # # Export necessary variables for the deployment script
+#     # - export DOCKER_USERNAME=$SSHKP_USERNAME
+#     # - export DOCKER_PASSWORD=$SSHKP_PASSWORD
+#     # Load the build version
+#     - export IMAGE_TAG=$(cat build_version.txt)
 
-    # Debugging variables
-    - echo "$IMAGE_TAG"
-    - echo "$BIND_PORT"
-    - echo "$SSHKP_USERNAME"
-    - echo "$SSHKP_PASSWORD"
-    - env | sort
+#     # Debugging variables
+#     - echo "$IMAGE_TAG"
+#     - echo "$BIND_PORT"
+#     - echo "$SSHKP_USERNAME"
+#     - echo "$SSHKP_PASSWORD"
+#     - env | sort
 
-    # Run deploy.sh on the target VM with the required parameters
-    - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
-    # - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 8000 bthoma02 glpat-AhYv5xkKPWKSGGBSpGQ8"
+#     # Run deploy.sh on the target VM with the required parameters
+#     - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
+#     # - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 8000 bthoma02 glpat-AhYv5xkKPWKSGGBSpGQ8"
 
 
 deploy-with-docker-api:
   stage: deploy-with-docker-api
+  tags:
+    - docker-in-docker # this forces the CI job to on the dedicated DinD runner
   image: docker:20.10
   variables:
     DOCKER_HOST: tcp://10.93.46.34:8080  # Remote Docker API
