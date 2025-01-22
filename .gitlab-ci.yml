@@ -131,13 +131,13 @@ deploy:
     # Debugging variables
     - echo "$IMAGE_TAG"
     - echo "$BIND_PORT"
-    - echo "$SSHKP_USERNAME"
-    - echo "$SSHKP_PASSWORD"
+    - echo "$DOCKER_USERNAME"
+    - echo "$DOCKER_PASSWORD"
     - env | sort
 
     # Run deploy.sh on the target VM with the required parameters
     # - ssh itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
-    - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $SSHKP_USERNAME $SSHKP_PASSWORD"
+    - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG $BIND_PORT $DOCKER_USERNAME $DOCKER_PASSWORD"
     # - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh 0.0.0-c790aedc-5450 8000 bthoma02 glpat-AhYv5xkKPWKSGGBSpGQ8"
 
 
