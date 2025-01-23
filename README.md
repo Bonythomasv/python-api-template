@@ -60,7 +60,7 @@ To build and run the Docker image, use the following commands:
 docker build -t target-make-python-devex:latest .
 
 # Run the Docker container
-docker run -p 8000:8000 make-python-devex:latest
+docker run -p 8000:8000 target-make-python-devex:latest
 ```
 
 ### Running the Application
