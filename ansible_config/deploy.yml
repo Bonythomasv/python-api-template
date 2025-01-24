@@ -28,22 +28,6 @@
         msg: "Required parameters are missing. Ensure IMAGE_TAG, BIND_PORT, DOCKER_REGISTRY, DOCKER_USERNAME, and DOCKER_PASSWORD are provided."
       when: image_tag == "" or bind_port == "" or docker_registry == "" or docker_username == "" or docker_password == ""
 
-    - name: Check if port {{ bind_port }} is in use
-      shell: |
-        netstat -tuln | grep ":{{ bind_port }}"
-      register: port_check
-      ignore_errors: true
-
-    - name: Debug port check output
-      debug:
-        msg: "{{ port_check.stdout }}"
-
-    - name: Stop the service using port {{ bind_port }} if found
-      shell: |
-        fuser -k {{ bind_port }}/tcp
-      when: port_check.rc == 0
-      ignore_errors: true
-
     - name: Log in to Docker registry
       community.docker.docker_login:
         registry_url: "{{ docker_registry }}"
