@@ -14,6 +14,9 @@ variables:
   DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
   IMAGE_NAME: "ubc/cybersecurity/services/ciso/itsa-test-project/make-python-devex-bt"
   DEFAULT_BIND_PORT: "8000"               # Define the port to bind on the host for docker container
+  ANSIBLE_HOST: "dev-spielplatz.misc.devl.infosec.it.ubc.ca"
+  ANSIBLE_USER: "itsa-svc-spielplatz-gitlab"
+  ANSILBE_SSHKEY: "$PRIVATE_KEY_dev_spielplatz_Server"
 
 
 default:
@@ -83,12 +86,6 @@ build_and_push:
     # Save the build version as a CI/CD variable
     - echo "$IMAGE_TAG" > build_version.txt
 
-    # # Save build metadata
-    # - mkdir -p .build_metadata
-    # - echo "COMMIT_ID=$COMMIT_ID" > .build_metadata/build_info.txt
-    # - echo "PIPELINE_ID=$PIPELINE_ID" >> .build_metadata/build_info.txt
-    # - echo "BUILD_VERSION=$BUILD_VERSION" >> .build_metadata/build_info.txt
-
     # Authenticate with the Docker registry
     - echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
 
@@ -102,42 +99,51 @@ build_and_push:
       - build_version.txt
     expire_in: 1 day
 
-deploy:
+# deploy:
+#   stage: deploy
+#   image: docker:20.10  # Use a Docker image with Docker CLI preinstalled
+#   before_script:
+#     # Set up SSH for deployment
+#     - mkdir -p ~/.ssh
+#     - echo "$PRIVATE_KEY_dev_spielplatz_Server" | tr -d '\r' > ~/.ssh/id_rsa
+#     - chmod 600 ~/.ssh/id_rsa
+#     - eval "$(ssh-agent -s)"
+#     - ssh-add ~/.ssh/id_rsa
+
+#     # Add the target VM to known_hosts to prevent interactive prompts
+#     - echo "Testing ssh-keyscan"
+#     - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"
+#     - cat ~/.ssh/known_hosts
+
+#   script:
+#     - echo "Deploying the Docker container to the target VM..."
+#     # Load the build version
+#     - export IMAGE_TAG=$(cat build_version.txt)
+#     # Run deploy.sh on the target VM with the required parameters
+#     - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG ${BIND_PORT:-$DEFAULT_BIND_PORT} $DOCKER_USERNAME $DOCKER_PASSWORD"
+
+
+ansible_deploy:
   stage: deploy
-  # tags:
-  #   - docker-in-docker # this forces the CI job to on the dedicated DinD runner
-  image: docker:20.10  # Use a Docker image with Docker CLI preinstalled
+  environment: develop
+  image: docker:24.0.5
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
   before_script:
     # Set up SSH for deployment
     - mkdir -p ~/.ssh
-    - echo "$PRIVATE_KEY_dev_spielplatz_Server" | tr -d '\r' > ~/.ssh/id_rsa
+    - echo "$ANSILBE_SSHKEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - eval "$(ssh-agent -s)"
     - ssh-add ~/.ssh/id_rsa
 
     # Add the target VM to known_hosts to prevent interactive prompts
     - echo "Testing ssh-keyscan"
-    - ssh-keyscan -H dev-spielplatz.misc.devl.infosec.it.ubc.ca >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"
+    - ssh-keyscan -H $ANSIBLE_HOST >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"
     - cat ~/.ssh/known_hosts
-
   script:
-    - echo "Deploying the Docker container to the target VM..."
-    # # Export necessary variables for the deployment script
-    # - export DOCKER_USERNAME=$SSHKP_USERNAME
-    # - export DOCKER_PASSWORD=$SSHKP_PASSWORD
-    # Load the build version
-    - export IMAGE_TAG=$(cat build_version.txt)
-
-    # Debugging variables
-    - echo "$IMAGE_TAG"
-    - echo "$BIND_PORT"
-    - echo "$DOCKER_USERNAME"
-    - echo "$DOCKER_PASSWORD"
-    - env | sort
-
-    # Run deploy.sh on the target VM with the required parameters
-    - ssh -vvv itsa-svc-spielplatz-gitlab@dev-spielplatz.misc.devl.infosec.it.ubc.ca "bash /home/eldap_prov_prod/itsa-svc-spielplatz-gitlab/deploy.sh $IMAGE_TAG ${BIND_PORT:-$DEFAULT_BIND_PORT} $DOCKER_USERNAME $DOCKER_PASSWORD"
-
+    - apk add --no-cache ansible
+    - ansible-playbook -i ansible_config/inventory.ini ansible_config/deploy.yml -u $ANSIBLE_USER
 
 # deploy-with-docker-api:
 #   stage: deploy-with-docker-api
@@ -154,20 +160,15 @@ deploy:
 #     - curl -v http://10.93.46.34:8080/version || echo "Docker API endpoint /version failed"
 #     - echo "Environment Variables:"
 #     - env | sort
-
 #     # Test connectivity to the Docker daemon
 #     - echo "Testing connection to Docker daemon via DOCKER_HOST=$DOCKER_HOST"
 #     - docker info
-
 #     # Load the build version
 #     - export IMAGE_TAG=$(cat build_version.txt)
-
 #     # Authenticate with the Docker registry
 #     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $DOCKER_REGISTRY
-
 #     # Pull the Docker image
 #     - docker pull $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-
 #     # Run the container on the remote host
 #     - docker stop make-python-devex-bt || true
 #     - docker rm make-python-devex-bt || true
