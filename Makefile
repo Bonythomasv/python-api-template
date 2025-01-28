@@ -10,7 +10,7 @@
 ##
 
 ## Source location
-MODULE_BASE_DIR = example
+MODULE_BASE_DIR = python_api_template
 TESTS_BASE_DIR = tests
 
 ## Pythonic variables
@@ -121,9 +121,13 @@ check-py-ruff-lint: ## Run ruff linter
 	$(RUFF) $(RUFF_OPTS) check $(MODULE_BASE_DIR) $(TESTS_BASE_DIR) || \
 		(echo "$(COLOR_RED)Run '$(notdir $(MAKE)) check-py-ruff-fix' to fix some of these automatically if [*] appears above, then run '$(notdir $(MAKE)) $(MAKECMDGOALS)' again." && false)
 
+#.PHONY: check-py-ruff-fix
+#check-py-ruff-fix: ## Run ruff linter
+#	$(MAKE) check-py-ruff-lint RUFF_OPTS=--fix
+
 .PHONY: check-py-ruff-fix
-check-py-ruff-fix: ## Run ruff linter
-	$(MAKE) check-py-ruff-lint RUFF_OPTS=--fix
+check-py-ruff-fix: ## Automatically fix formatting issues
+	$(RUFF) check $(MODULE_BASE_DIR) $(TESTS_BASE_DIR) --fix
 
 .PHONY: check-py-black
 check-py-black: ## Runs black code formatter
@@ -131,7 +135,7 @@ check-py-black: ## Runs black code formatter
 
 .PHONY: check-py-ruff-format
 check-py-ruff-format: ## Runs ruff code formatter
-	$(RUFF) $(RUFF_OPTS) format --check .
+	$(RUFF) $(RUFF_OPTS) check $(MODULE_BASE_DIR) $(TESTS_BASE_DIR)
 
 BUILD_DIR ?= build
 REPORTS_DIR = $(BUILD_DIR)/reports
@@ -337,4 +341,4 @@ all:
 clean: ## Clean artifacts from build and dist directories
 	rm -rf $(BUILD_DIR) dist/requirements.txt
 start:
-	python3 -m example
+	python3 -m python_api_template

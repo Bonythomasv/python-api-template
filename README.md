@@ -35,8 +35,17 @@ Run the following commands to install the necessary dependencies:
 # Install dependencies
 make deps
 
-# Run dependency checks, tests, and build the project
+# Run test
+make test
+
+# Run test
+make build
+
+or
+
+# to install dependencies, check the code, run tests, and build the distributable
 make deps check test build
+
 ```
 
 ### Running the API Server
@@ -48,7 +57,7 @@ To run the API server, add a new dependency (e.g., `uvicorn`) and start the serv
 poetry add uvicorn
 
 # Run the API server
-poetry run uvicorn python-api-template:app --reload
+poetry run uvicorn python_api_template:app --reload
 ```
 
 ### Building and Running Docker Images
@@ -57,10 +66,10 @@ To build and run the Docker image, use the following commands:
 
 ```bash
 # Build the Docker image
-docker build -t target-python-api-template:latest .
+docker build -t python-api-template:latest .
 
 # Run the Docker container
-docker run -p 8000:8000 target-python-api-template:latest
+docker run -p 8000:8000 python-api-template:latest
 ```
 
 ### Running the Application

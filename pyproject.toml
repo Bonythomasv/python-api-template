@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "example"
+name = "python-api-template"
 version = "0.0.1"
 description = "This is a demonstration of the Make Python Devex concept project"
 authors = ["Bony Thomas"]
@@ -11,7 +11,8 @@ license = "CC0"
 readme = "README.md"
 
 [tool.poetry.scripts]
-example-make-python-devex = "example:main"
+python-api-template = "python_api_template:main"
+
 
 [tool.poetry.dependencies]
 # set Python constraints
@@ -29,7 +30,6 @@ uvicorn = "^0.34.0"
 
 [tool.poetry.group.dev.dependencies]
 # test framework
-pytest = "^8"
 # html output
 pytest-html = "*"
 # necessary for best html output
@@ -41,7 +41,6 @@ pytest-cov = "*"
 # opinionated code formatter
 black = ">=22"
 # type hints checker
-mypy = { version = "*", extras = ["faster-cache"] }
 # xml library, used for outputting HTML reports from mypy, etc.
 lxml = "*"
 # lightning fast linter and style checker
@@ -57,6 +56,8 @@ types-retry = "*"
 ## Configure publish destination explicitly, for safety
 ## Default is PyPI but you probably don't want to do that internally.
 ## See also https://python-poetry.org/docs/repositories/#publishable-repositories
+mypy = "^1.14.1"
+pytest = "^8.3.4"
 [[tool.poetry.source]]
 name = "publish-source"
 url = "https://pypi.example.com/pypi/example-repo"
@@ -107,7 +108,7 @@ directory = "build/coverage"
 [tool.coverage.xml]
 output = "build/coverage/coverage.xml"
 [tool.coverage.paths]
-source = ["example"]
+source = ["python-api-template"]
 
 [tool.ruff]
 # Same as Black.

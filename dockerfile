@@ -25,4 +25,4 @@ RUN python --version && pip --version
 EXPOSE 8000
 
 # Define the default command to run your application
-CMD ["uvicorn", "example:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "python_api_template:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
