@@ -21,7 +21,7 @@ You can clone the repository using either of the following commands:
 
 ```bash
 # Using GitHub CLI
-gh repo clone target/make-python-devex
+gh repo clone target/python-api-template
 
 # Or using Git
 git clone https://github.com/target/make-python-devex.git
@@ -48,7 +48,7 @@ To run the API server, add a new dependency (e.g., `uvicorn`) and start the serv
 poetry add uvicorn
 
 # Run the API server
-poetry run uvicorn example:app --reload
+poetry run uvicorn python-api-template:app --reload
 ```
 
 ### Building and Running Docker Images
@@ -57,10 +57,10 @@ To build and run the Docker image, use the following commands:
 
 ```bash
 # Build the Docker image
-docker build -t target-make-python-devex:latest .
+docker build -t target-python-api-template:latest .
 
 # Run the Docker container
-docker run -p 8000:8000 target-make-python-devex:latest
+docker run -p 8000:8000 target-python-api-template:latest
 ```
 
 ### Running the Application
@@ -69,7 +69,7 @@ After building the project, you can run the app:
 
 ```bash
 # Run the app
-poetry run example-make-python-devex
+poetry run python-api-template-python-api-template
 ```
 
 ### Available Make Tasks
