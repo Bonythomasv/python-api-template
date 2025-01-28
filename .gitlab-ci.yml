@@ -12,7 +12,7 @@ variables:
   DOCKER_REGISTRY: "registry.infosec.it.ubc.ca"
   DOCKER_USERNAME: $CI_REGISTRY_USER
   DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
-  IMAGE_NAME: "ubc/cybersecurity/services/ciso/Development/python-api-template"
+  IMAGE_NAME: "ubc/cybersecurity/services/ciso/development/python-api-template"
   DEFAULT_BIND_PORT: "8000"               # Define the port to bind on the host for docker container
   ANSIBLE_HOST: "dev-spielplatz.misc.devl.infosec.it.ubc.ca"
   ANSIBLE_USER: "itsa-svc-spielplatz-gitlab"
