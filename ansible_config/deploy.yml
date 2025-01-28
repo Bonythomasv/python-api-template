@@ -6,7 +6,7 @@
     bind_port: 8000
     container_port: 8000
     container_name: python-api-template-bt
-    image_name: "{{ lookup('env', 'CI_REGISTRY_IMAGE') }}/"
+    image_name: "{{ lookup('env', 'CI_REGISTRY_IMAGE') }}"
     docker_registry: "{{ lookup('env', 'CI_REGISTRY') }}"
     docker_username: "{{ lookup('env', 'CI_REGISTRY_USER') }}"
     docker_password: "{{ lookup('env', 'CI_REGISTRY_PASSWORD') }}"
