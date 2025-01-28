@@ -3,7 +3,6 @@
   hosts: all
   gather_facts: false
   vars:
-    image_tag: latest
     bind_port: 8000
     container_port: 8000
     container_name: python-api-template-bt
@@ -13,6 +12,9 @@
     docker_password: "{{ lookup('env', 'CI_REGISTRY_PASSWORD') }}"
 
   tasks:
+    - name: Set default value for image_tag
+      set_fact:
+        image_tag: "{{ image_tag | default('latest') }}"
     - name: Debug input variables
       debug:
         msg:

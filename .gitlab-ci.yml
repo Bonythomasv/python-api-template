@@ -143,7 +143,8 @@ ansible_deploy:
     - cat ~/.ssh/known_hosts
   script:
     - apk add --no-cache ansible
-    - ansible-playbook -i ansible_config/inventory.ini ansible_config/deploy.yml -u $ANSIBLE_USER
+    - export IMAGE_TAG=$(cat build_version.txt)
+    - ansible-playbook -i ansible_config/inventory.ini ansible_config/deploy.yml -u $ANSIBLE_USER $IMAGE_TAG
 
 # deploy-with-docker-api:
 #   stage: deploy-with-docker-api
