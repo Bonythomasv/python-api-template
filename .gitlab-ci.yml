@@ -132,6 +132,7 @@ ansible_deploy:
   before_script:
     # Set up SSH for deployment
     - mkdir -p ~/.ssh
+    - echo "$ANSILBE_SSHKEY"    
     - echo "$ANSILBE_SSHKEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - eval "$(ssh-agent -s)"
