@@ -1,0 +1,9 @@
+# Trivy ignore file for Python API Template
+# Add patterns to ignore false positives or known issues
+
+# Example patterns:
+# CVE-2023-1234  # Known false positive
+# CVE-2023-5678  # Already patched in our version
+# secret:aws-access-key-id  # False positive in test files
+
+# Add specific CVEs or patterns as needed

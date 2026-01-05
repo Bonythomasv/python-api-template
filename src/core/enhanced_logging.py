@@ -6,7 +6,6 @@ import os
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
 from src.core.constants import EventKeys
 
 # Registry to track initialized loggers

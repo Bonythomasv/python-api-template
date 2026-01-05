@@ -10,6 +10,8 @@ brew "pyenv"
 brew "pyenv-virtualenv"
 # Dockerfile linting, but only if we have Dockerfiles
 brew "hadolint" unless %x[find . -iname Dockerfile].empty?
+# Security vulnerability scanner and SBOM generator
+brew "trivy"
 # Pre-commit checks, if we have a config
 brew "pre-commit" if File.exist?(".pre-commit-config.yaml")
 

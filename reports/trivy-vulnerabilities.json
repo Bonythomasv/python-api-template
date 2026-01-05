@@ -1,0 +1,673 @@
+{
+  "SchemaVersion": 2,
+  "ReportID": "019b903f-1fce-7059-8b62-d9b963e9f332",
+  "CreatedAt": "2026-01-05T14:20:14.670024-08:00",
+  "ArtifactID": "sha256:b5010e1ab66744fe4303d3cfcbafe265c355ab027850f9ad7d4bd8cda30c47e5",
+  "ArtifactName": ".",
+  "ArtifactType": "repository",
+  "Metadata": {
+    "RepoURL": "git@github.com:Bonythomasv/python-api-template.git",
+    "Branch": "main",
+    "Commit": "0eecd54752924b4be29158e364a70cd4ce05c4e6",
+    "CommitMsg": "Update project structure and enhance security features\n\n- Updated Python version in `.python-version` and added new categories.\n- Modified Dockerfile to point to the correct application entry point.\n- Removed LICENSE.md file.\n- Refactored Makefile to include security checks and vulnerability scanning using Trivy.\n- Updated `pyproject.toml` to reflect new package structure and dependencies.\n- Enhanced README.md with updated instructions and added security features.\n- Adjusted project structure to follow a modern `src/` layout.\n- Updated IDE configuration to reflect changes in the project structure.",
+    "Author": "Bony Thomas \u003cbony.thomas@ubc.ca\u003e",
+    "Committer": "Bony Thomas \u003cbony.thomas@ubc.ca\u003e"
+  },
+  "Results": [
+    {
+      "Target": "poetry.lock",
+      "Class": "lang-pkgs",
+      "Type": "poetry",
+      "Packages": [
+        {
+          "ID": "ansi2html@1.9.2",
+          "Name": "ansi2html",
+          "Identifier": {
+            "PURL": "pkg:pypi/ansi2html@1.9.2",
+            "UID": "3ad9b428dcf10308"
+          },
+          "Version": "1.9.2",
+          "Dev": true,
+          "Relationship": "direct"
+        },
+        {
+          "ID": "black@24.10.0",
+          "Name": "black",
+          "Identifier": {
+            "PURL": "pkg:pypi/black@24.10.0",
+            "UID": "f4467a3f0595b43c"
+          },
+          "Version": "24.10.0",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "click@8.1.7",
+            "mypy-extensions@1.0.0",
+            "packaging@23.2",
+            "pathspec@0.11.2",
+            "platformdirs@4.0.0",
+            "tomli@2.0.1",
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "deprecated@1.2.15",
+          "Name": "deprecated",
+          "Identifier": {
+            "PURL": "pkg:pypi/deprecated@1.2.15",
+            "UID": "b47500b7c00dc1d1"
+          },
+          "Version": "1.2.15",
+          "Relationship": "direct",
+          "DependsOn": [
+            "wrapt@1.16.0"
+          ]
+        },
+        {
+          "ID": "fastapi@0.128.0",
+          "Name": "fastapi",
+          "Identifier": {
+            "PURL": "pkg:pypi/fastapi@0.128.0",
+            "UID": "3597a9665b227262"
+          },
+          "Version": "0.128.0",
+          "Relationship": "direct",
+          "DependsOn": [
+            "annotated-doc@0.0.4",
+            "pydantic@2.10.4",
+            "starlette@0.49.3",
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "h11@0.16.0",
+          "Name": "h11",
+          "Identifier": {
+            "PURL": "pkg:pypi/h11@0.16.0",
+            "UID": "d7d9b085501d9cb9"
+          },
+          "Version": "0.16.0",
+          "Relationship": "direct"
+        },
+        {
+          "ID": "jinja2@3.1.6",
+          "Name": "jinja2",
+          "Identifier": {
+            "PURL": "pkg:pypi/jinja2@3.1.6",
+            "UID": "85f0dc4479b43e0c"
+          },
+          "Version": "3.1.6",
+          "Relationship": "direct",
+          "DependsOn": [
+            "markupsafe@2.1.3"
+          ]
+        },
+        {
+          "ID": "loguru@0.7.3",
+          "Name": "loguru",
+          "Identifier": {
+            "PURL": "pkg:pypi/loguru@0.7.3",
+            "UID": "6068f3ad4a5e5365"
+          },
+          "Version": "0.7.3",
+          "Relationship": "direct",
+          "DependsOn": [
+            "colorama@0.4.6",
+            "win32-setctime@1.1.0"
+          ]
+        },
+        {
+          "ID": "lxml@5.3.0",
+          "Name": "lxml",
+          "Identifier": {
+            "PURL": "pkg:pypi/lxml@5.3.0",
+            "UID": "cdb0b69b5f5e01ae"
+          },
+          "Version": "5.3.0",
+          "Dev": true,
+          "Relationship": "direct"
+        },
+        {
+          "ID": "mypy@1.14.1",
+          "Name": "mypy",
+          "Identifier": {
+            "PURL": "pkg:pypi/mypy@1.14.1",
+            "UID": "7375283851c29aa7"
+          },
+          "Version": "1.14.1",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "mypy-extensions@1.0.0",
+            "tomli@2.0.1",
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "peru@1.3.2",
+          "Name": "peru",
+          "Identifier": {
+            "PURL": "pkg:pypi/peru@1.3.2",
+            "UID": "a2728be496aef05a"
+          },
+          "Version": "1.3.2",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "docopt@0.6.2",
+            "pyyaml@6.0.1"
+          ]
+        },
+        {
+          "ID": "pydantic@2.10.4",
+          "Name": "pydantic",
+          "Identifier": {
+            "PURL": "pkg:pypi/pydantic@2.10.4",
+            "UID": "6f425952a0b3ed51"
+          },
+          "Version": "2.10.4",
+          "Relationship": "direct",
+          "DependsOn": [
+            "annotated-types@0.7.0",
+            "pydantic-core@2.27.2",
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "pytest@8.3.4",
+          "Name": "pytest",
+          "Identifier": {
+            "PURL": "pkg:pypi/pytest@8.3.4",
+            "UID": "db0cfa1366375ff0"
+          },
+          "Version": "8.3.4",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "colorama@0.4.6",
+            "exceptiongroup@1.2.0",
+            "iniconfig@2.0.0",
+            "packaging@23.2",
+            "pluggy@1.5.0",
+            "tomli@2.0.1"
+          ]
+        },
+        {
+          "ID": "pytest-cov@6.0.0",
+          "Name": "pytest-cov",
+          "Identifier": {
+            "PURL": "pkg:pypi/pytest-cov@6.0.0",
+            "UID": "51f620657a13bd5d"
+          },
+          "Version": "6.0.0",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "coverage@7.6.4",
+            "pytest@8.3.4"
+          ]
+        },
+        {
+          "ID": "pytest-html@4.1.1",
+          "Name": "pytest-html",
+          "Identifier": {
+            "PURL": "pkg:pypi/pytest-html@4.1.1",
+            "UID": "ada18ab032a28785"
+          },
+          "Version": "4.1.1",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "jinja2@3.1.6",
+            "pytest-metadata@3.0.0",
+            "pytest@8.3.4"
+          ]
+        },
+        {
+          "ID": "pytest-tap@3.4",
+          "Name": "pytest-tap",
+          "Identifier": {
+            "PURL": "pkg:pypi/pytest-tap@3.4",
+            "UID": "5358a6a56b27ff3f"
+          },
+          "Version": "3.4",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "pytest@8.3.4",
+            "tap-py@3.1"
+          ]
+        },
+        {
+          "ID": "retry2@0.9.5",
+          "Name": "retry2",
+          "Identifier": {
+            "PURL": "pkg:pypi/retry2@0.9.5",
+            "UID": "d2822bac95656074"
+          },
+          "Version": "0.9.5",
+          "Relationship": "direct",
+          "DependsOn": [
+            "decorator@5.1.1"
+          ]
+        },
+        {
+          "ID": "ruff@0.8.4",
+          "Name": "ruff",
+          "Identifier": {
+            "PURL": "pkg:pypi/ruff@0.8.4",
+            "UID": "8606a20a28b35f64"
+          },
+          "Version": "0.8.4",
+          "Dev": true,
+          "Relationship": "direct"
+        },
+        {
+          "ID": "types-deprecated@1.2.15.20241117",
+          "Name": "types-deprecated",
+          "Identifier": {
+            "PURL": "pkg:pypi/types-deprecated@1.2.15.20241117",
+            "UID": "4029d4cf69a812ef"
+          },
+          "Version": "1.2.15.20241117",
+          "Dev": true,
+          "Relationship": "direct"
+        },
+        {
+          "ID": "types-psutil@7.2.1.20251231",
+          "Name": "types-psutil",
+          "Identifier": {
+            "PURL": "pkg:pypi/types-psutil@7.2.1.20251231",
+            "UID": "d44f960b84400414"
+          },
+          "Version": "7.2.1.20251231",
+          "Dev": true,
+          "Relationship": "direct"
+        },
+        {
+          "ID": "types-requests@2.32.4.20250913",
+          "Name": "types-requests",
+          "Identifier": {
+            "PURL": "pkg:pypi/types-requests@2.32.4.20250913",
+            "UID": "dc0b43181b2eb7a7"
+          },
+          "Version": "2.32.4.20250913",
+          "Dev": true,
+          "Relationship": "direct",
+          "DependsOn": [
+            "urllib3@2.6.2"
+          ]
+        },
+        {
+          "ID": "types-retry@0.9.9.20241221",
+          "Name": "types-retry",
+          "Identifier": {
+            "PURL": "pkg:pypi/types-retry@0.9.9.20241221",
+            "UID": "13607b74809aa05f"
+          },
+          "Version": "0.9.9.20241221",
+          "Dev": true,
+          "Relationship": "direct"
+        },
+        {
+          "ID": "uvicorn@0.34.0",
+          "Name": "uvicorn",
+          "Identifier": {
+            "PURL": "pkg:pypi/uvicorn@0.34.0",
+            "UID": "a6a5fb250bbac91e"
+          },
+          "Version": "0.34.0",
+          "Relationship": "direct",
+          "DependsOn": [
+            "click@8.1.7",
+            "h11@0.16.0",
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "annotated-doc@0.0.4",
+          "Name": "annotated-doc",
+          "Identifier": {
+            "PURL": "pkg:pypi/annotated-doc@0.0.4",
+            "UID": "12c5a5c61b40b89e"
+          },
+          "Version": "0.0.4",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "annotated-types@0.7.0",
+          "Name": "annotated-types",
+          "Identifier": {
+            "PURL": "pkg:pypi/annotated-types@0.7.0",
+            "UID": "591a23f8f617aefd"
+          },
+          "Version": "0.7.0",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "anyio@4.7.0",
+          "Name": "anyio",
+          "Identifier": {
+            "PURL": "pkg:pypi/anyio@4.7.0",
+            "UID": "941b33e6fd14d098"
+          },
+          "Version": "4.7.0",
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "exceptiongroup@1.2.0",
+            "idna@3.10",
+            "sniffio@1.3.1",
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "click@8.1.7",
+          "Name": "click",
+          "Identifier": {
+            "PURL": "pkg:pypi/click@8.1.7",
+            "UID": "5330867315e3bfc1"
+          },
+          "Version": "8.1.7",
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "colorama@0.4.6"
+          ]
+        },
+        {
+          "ID": "colorama@0.4.6",
+          "Name": "colorama",
+          "Identifier": {
+            "PURL": "pkg:pypi/colorama@0.4.6",
+            "UID": "c7ed705c1cc43242"
+          },
+          "Version": "0.4.6",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "coverage@7.6.4",
+          "Name": "coverage",
+          "Identifier": {
+            "PURL": "pkg:pypi/coverage@7.6.4",
+            "UID": "9be5933b381c0a49"
+          },
+          "Version": "7.6.4",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "tomli@2.0.1"
+          ]
+        },
+        {
+          "ID": "decorator@5.1.1",
+          "Name": "decorator",
+          "Identifier": {
+            "PURL": "pkg:pypi/decorator@5.1.1",
+            "UID": "b52afd2c13304e68"
+          },
+          "Version": "5.1.1",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "docopt@0.6.2",
+          "Name": "docopt",
+          "Identifier": {
+            "PURL": "pkg:pypi/docopt@0.6.2",
+            "UID": "c738de3770a84217"
+          },
+          "Version": "0.6.2",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "exceptiongroup@1.2.0",
+          "Name": "exceptiongroup",
+          "Identifier": {
+            "PURL": "pkg:pypi/exceptiongroup@1.2.0",
+            "UID": "30ec145c6355335b"
+          },
+          "Version": "1.2.0",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "idna@3.10",
+          "Name": "idna",
+          "Identifier": {
+            "PURL": "pkg:pypi/idna@3.10",
+            "UID": "20ae4941f400c5dc"
+          },
+          "Version": "3.10",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "iniconfig@2.0.0",
+          "Name": "iniconfig",
+          "Identifier": {
+            "PURL": "pkg:pypi/iniconfig@2.0.0",
+            "UID": "cae42bbbb6089d58"
+          },
+          "Version": "2.0.0",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "markupsafe@2.1.3",
+          "Name": "markupsafe",
+          "Identifier": {
+            "PURL": "pkg:pypi/markupsafe@2.1.3",
+            "UID": "873706e92c0fb122"
+          },
+          "Version": "2.1.3",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "mypy-extensions@1.0.0",
+          "Name": "mypy-extensions",
+          "Identifier": {
+            "PURL": "pkg:pypi/mypy-extensions@1.0.0",
+            "UID": "6340ff7c0546919a"
+          },
+          "Version": "1.0.0",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "packaging@23.2",
+          "Name": "packaging",
+          "Identifier": {
+            "PURL": "pkg:pypi/packaging@23.2",
+            "UID": "be2693186407b0f0"
+          },
+          "Version": "23.2",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "pathspec@0.11.2",
+          "Name": "pathspec",
+          "Identifier": {
+            "PURL": "pkg:pypi/pathspec@0.11.2",
+            "UID": "47d1b8781d357a16"
+          },
+          "Version": "0.11.2",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "platformdirs@4.0.0",
+          "Name": "platformdirs",
+          "Identifier": {
+            "PURL": "pkg:pypi/platformdirs@4.0.0",
+            "UID": "99b4138c45fac218"
+          },
+          "Version": "4.0.0",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "pluggy@1.5.0",
+          "Name": "pluggy",
+          "Identifier": {
+            "PURL": "pkg:pypi/pluggy@1.5.0",
+            "UID": "9fa5c1982bef2b50"
+          },
+          "Version": "1.5.0",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "pydantic-core@2.27.2",
+          "Name": "pydantic-core",
+          "Identifier": {
+            "PURL": "pkg:pypi/pydantic-core@2.27.2",
+            "UID": "8ed5c12063ca2962"
+          },
+          "Version": "2.27.2",
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "pytest-metadata@3.0.0",
+          "Name": "pytest-metadata",
+          "Identifier": {
+            "PURL": "pkg:pypi/pytest-metadata@3.0.0",
+            "UID": "21111a8217915a39"
+          },
+          "Version": "3.0.0",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "pytest@8.3.4"
+          ]
+        },
+        {
+          "ID": "pyyaml@6.0.1",
+          "Name": "pyyaml",
+          "Identifier": {
+            "PURL": "pkg:pypi/pyyaml@6.0.1",
+            "UID": "fe405b4c70941f6f"
+          },
+          "Version": "6.0.1",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "sniffio@1.3.1",
+          "Name": "sniffio",
+          "Identifier": {
+            "PURL": "pkg:pypi/sniffio@1.3.1",
+            "UID": "afda56969b29bfd7"
+          },
+          "Version": "1.3.1",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "starlette@0.49.3",
+          "Name": "starlette",
+          "Identifier": {
+            "PURL": "pkg:pypi/starlette@0.49.3",
+            "UID": "9ea04d886d0db538"
+          },
+          "Version": "0.49.3",
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "anyio@4.7.0",
+            "typing-extensions@4.12.2"
+          ]
+        },
+        {
+          "ID": "tap-py@3.1",
+          "Name": "tap-py",
+          "Identifier": {
+            "PURL": "pkg:pypi/tap-py@3.1",
+            "UID": "61004dfed30ff928"
+          },
+          "Version": "3.1",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "tomli@2.0.1",
+          "Name": "tomli",
+          "Identifier": {
+            "PURL": "pkg:pypi/tomli@2.0.1",
+            "UID": "5044afb6e71d937d"
+          },
+          "Version": "2.0.1",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "typing-extensions@4.12.2",
+          "Name": "typing-extensions",
+          "Identifier": {
+            "PURL": "pkg:pypi/typing-extensions@4.12.2",
+            "UID": "44e6fcc5a409f600"
+          },
+          "Version": "4.12.2",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "urllib3@2.6.2",
+          "Name": "urllib3",
+          "Identifier": {
+            "PURL": "pkg:pypi/urllib3@2.6.2",
+            "UID": "9009dcb6d1c56dbc"
+          },
+          "Version": "2.6.2",
+          "Dev": true,
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "win32-setctime@1.1.0",
+          "Name": "win32-setctime",
+          "Identifier": {
+            "PURL": "pkg:pypi/win32-setctime@1.1.0",
+            "UID": "9fad11ded41ebc96"
+          },
+          "Version": "1.1.0",
+          "Indirect": true,
+          "Relationship": "indirect"
+        },
+        {
+          "ID": "wrapt@1.16.0",
+          "Name": "wrapt",
+          "Identifier": {
+            "PURL": "pkg:pypi/wrapt@1.16.0",
+            "UID": "9f6eeac91b4223c4"
+          },
+          "Version": "1.16.0",
+          "Indirect": true,
+          "Relationship": "indirect"
+        }
+      ]
+    }
+  ]
+}

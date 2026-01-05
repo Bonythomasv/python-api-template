@@ -3,8 +3,8 @@ import json
 import atexit
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional
-from fastapi import FastAPI, Request, Response, HTTPException
+from typing import Any, Dict, List
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -12,11 +12,10 @@ from pydantic import BaseModel
 from src.core.enhanced_logging import get_logger, shutdown_logging
 from src.core.config import (
     ALLOWED_ORIGINS,
-    DEBUG_MODE,
     ENVIRONMENT,
     log_environment_variables
 )
-from src.core.constants import EventKeys, MediaTypes
+from src.core.constants import EventKeys
 
 # Initialize logger
 logger = get_logger(__name__)
@@ -120,7 +119,7 @@ class PythonAPITemplate:
             client_ip = request.client.host
 
         # Log incoming request
-        log_entry = {
+        log_entry: Dict[str, Any] = {
             EventKeys.TIMESTAMP: start_time.isoformat(),
             EventKeys.LOG_LEVEL: "info",
             "message": "Incoming request",
@@ -144,7 +143,7 @@ class PythonAPITemplate:
         duration = (end_time - start_time).total_seconds()
 
         # Log response
-        log_entry = {
+        response_log_entry: Dict[str, Any] = {
             EventKeys.TIMESTAMP: end_time.isoformat(),
             EventKeys.LOG_LEVEL: "info",
             "message": "Response sent",
@@ -154,7 +153,7 @@ class PythonAPITemplate:
             "http.response.status_code": response.status_code,
             "request_duration_seconds": duration,
         }
-        logger.info(json.dumps(log_entry, ensure_ascii=False, indent=2))
+        logger.info(json.dumps(response_log_entry, ensure_ascii=False, indent=2))
 
         return response
 

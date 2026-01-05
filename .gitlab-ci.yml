@@ -1,5 +1,6 @@
 stages:
   - test
+  - security-scan-trivy
   - build_and_push
   - deploy
   - deploy-with-docker-api
@@ -17,6 +18,8 @@ variables:
   ANSIBLE_HOST: "dev-spielplatz.misc.devl.infosec.it.ubc.ca"
   ANSIBLE_USER: "itsa-svc-spielplatz-gitlab"
   ANSILBE_SSHKEY: "$PRIVATE_KEY_dev_spielplatz_Server"
+  TRIVY_CACHE_PATH: ".trivy-cache"     # Trivy cache directory
+  TRIVY_SEVERITY: "CRITICAL,HIGH,MEDIUM"  # Default severity levels
 
 
 default:
@@ -61,13 +64,83 @@ test:
     # Install dependencies with Makefile
     - make deps || { echo "Makefile dependency installation failed"; exit 1; }
     - make test || { echo "Tests failed"; exit 1; }
-    - make build || { echo "Build failed"; exit 1; }
+    - make build TRIVY_CACHE_DIR=$TRIVY_CACHE_PATH || { echo "Build failed"; exit 1; }
 
   artifacts:
     paths:
       - .
       - dist/
     expire_in: 1 day
+
+security-scan-trivy:
+  stage: security-scan-trivy
+  environment: development
+  dependencies:
+    - test
+  script:
+    # Check if Homebrew is installed as non root user; if not, install it using Makefile
+    - if ! command -v brew &>/dev/null; then
+        echo "Homebrew not found. Installing with Makefile...";
+        make install-homebrew;
+      else
+        echo "Homebrew is already installed.";
+      fi
+
+    # Verify Homebrew installation for non root user
+    - export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+    - eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    - brew --version
+
+    # Set up Python environment
+    - python3 -m venv ${VENV_DIR}
+    - source ${VENV_DIR}/bin/activate
+    - pip install --upgrade pip
+
+    # Install Poetry
+    - curl -sSL https://install.python-poetry.org | python3 -
+    - export PATH="/root/.local/bin:$PATH"  # Add Poetry to PATH
+
+    # Verify Poetry installation
+    - poetry --version
+    - poetry env use python3
+
+    # Install Trivy
+    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    - trivy --version
+
+    # Install dependencies and run security scan
+    - make deps || { echo "dependency installation failed"; exit 1; }
+
+    # Run security scan using cached Trivy database if available
+    - |
+      if [ -d "$TRIVY_CACHE_PATH" ] && [ -f "$TRIVY_CACHE_PATH/trivy.db" ]; then
+        echo "Using cached Trivy database from $TRIVY_CACHE_PATH"
+        make check-security-trivy TRIVY_CACHE_DIR=$TRIVY_CACHE_PATH || { echo "security scan failed"; exit 1; }
+      else
+        echo "No Trivy cache found, downloading database..."
+        make check-security-trivy || { echo "security scan failed"; exit 1; }
+      fi
+
+    # Generate SBOM for compliance and security tracking
+    - |
+      if [ -d "$TRIVY_CACHE_PATH" ] && [ -f "$TRIVY_CACHE_PATH/trivy.db" ]; then
+        make generate-sbom TRIVY_CACHE_DIR=$TRIVY_CACHE_PATH || { echo "SBOM generation failed"; exit 1; }
+      else
+        make generate-sbom || { echo "SBOM generation failed"; exit 1; }
+      fi
+
+    # List generated files for debugging
+    - ls -la reports/ || echo "Reports directory not found"
+    - echo "Security scan completed successfully"
+
+  artifacts:
+    paths:
+      - reports/
+    expire_in: 30 days
+    when: always
+  # Only run on code changes, not on scheduled pipeline
+  rules:
+    - if: '$SCHEDULED_PIPELINE != "true"'
 
 build_and_push:
   stage: build_and_push
@@ -92,7 +165,24 @@ build_and_push:
     # Build the Docker image
     - docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
 
-    # Push the Docker image to the registry
+    # Install Trivy for security scanning
+    - apk add --no-cache curl
+    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    - trivy --version
+
+    # Scan the Docker image for vulnerabilities before pushing
+    - echo "Scanning Docker image for vulnerabilities..."
+    - |
+      if [ -d "$TRIVY_CACHE_PATH" ] && [ -f "$TRIVY_CACHE_PATH/trivy.db" ]; then
+        echo "Using cached Trivy database from $TRIVY_CACHE_PATH"
+        trivy image --cache-dir $TRIVY_CACHE_PATH --skip-db-update --scanners vuln --severity $TRIVY_SEVERITY $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG || { echo "Image scan failed"; exit 1; }
+      else
+        echo "No Trivy cache found, downloading database..."
+        trivy image --scanners vuln --severity $TRIVY_SEVERITY $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG || { echo "Image scan failed"; exit 1; }
+      fi
+
+    # If scan passes, push the Docker image to the registry
+    - echo "Security scan passed! Pushing image to registry..."
     - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
   artifacts:
     paths:
@@ -132,7 +222,7 @@ ansible_deploy:
   before_script:
     # Set up SSH for deployment
     - mkdir -p ~/.ssh
-    - echo "$ANSILBE_SSHKEY"    
+    - echo "$ANSILBE_SSHKEY"
     - echo "$ANSILBE_SSHKEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - eval "$(ssh-agent -s)"

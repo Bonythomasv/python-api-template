@@ -8,7 +8,7 @@ from src.core.constants import EventKeys
 
 # Try to load dotenv if available (optional dependency)
 try:
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv  # type: ignore[import-not-found]
     load_dotenv()
 except ImportError:
     pass
