@@ -9,9 +9,12 @@ description = "This is a demonstration of the Make Python Devex concept project"
 authors = ["Bony Thomas"]
 license = "CC0"
 readme = "README.md"
+packages = [
+    { include = "src" }
+]
 
 [tool.poetry.scripts]
-python-api-template = "python_api_template:main"
+python-api-template = "src.main:app"
 
 
 [tool.poetry.dependencies]
@@ -39,7 +42,7 @@ pytest-tap = "*"
 # coverage.py integration
 pytest-cov = "*"
 # opinionated code formatter
-black = ">=22"
+black = ">=24.3.0"
 # type hints checker
 # xml library, used for outputting HTML reports from mypy, etc.
 lxml = "*"
@@ -51,6 +54,14 @@ peru = "*"
 ## types packages
 types-Deprecated = "*"
 types-retry = "*"
+
+## Type stubs for external libraries (required for MyPy type checking)
+## types-requests: Provides type annotations for the requests library
+## The requests library doesn't include built-in type hints, so types-requests
+## enables MyPy to properly validate requests.get() calls, response methods, etc.
+## Without this, we'd get "Library stubs not installed for requests" errors
+types-requests = "^2.32.4.20250809"
+types-psutil = "^7.0.0.20251001"
 
 
 ## Configure publish destination explicitly, for safety
@@ -97,6 +108,7 @@ addopts = """
     --tap-outdir=build --tap-combined \
     --durations=10
 """
+asyncio_mode = "strict"
 
 # Configure coverage.py, which is enabled in the pytest addopts above
 [tool.coverage.run]
@@ -108,7 +120,7 @@ directory = "build/coverage"
 [tool.coverage.xml]
 output = "build/coverage/coverage.xml"
 [tool.coverage.paths]
-source = ["python-api-template"]
+source = ["src"]
 
 [tool.ruff]
 # Same as Black.

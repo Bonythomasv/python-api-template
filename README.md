@@ -50,15 +50,20 @@ make deps check test build
 
 ### Running the API Server
 
-To run the API server, add a new dependency (e.g., `uvicorn`) and start the server:
+To run the API server, use one of the following methods:
 
 ```bash
-# Add a new dependency (e.g., uvicorn)
-poetry add uvicorn
+# Using uvicorn directly
+poetry run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 
-# Run the API server
-poetry run uvicorn python_api_template:app --reload
+# Or using the script entry point
+poetry run python-api-template
 ```
+
+The API will be available at:
+- API: http://localhost:8000
+- Swagger UI: http://localhost:8000/docs (in development mode)
+- ReDoc: http://localhost:8000/redoc (in development mode)
 
 ### Building and Running Docker Images
 
@@ -72,18 +77,73 @@ docker build -t python-api-template:latest .
 docker run -p 8000:8000 python-api-template:latest
 ```
 
+### Project Structure
+
+The project uses a modern `src/` layout:
+
+```
+python-api-template/
+├── src/                    # Source code
+│   ├── __init__.py        # Package initialization
+│   ├── main.py            # FastAPI application entry point
+│   └── core/              # Core utilities and configuration
+│       ├── __init__.py
+│       ├── config.py      # Environment configuration
+│       ├── constants.py    # Application constants
+│       ├── enhanced_logging.py  # Structured JSON logging
+│       └── exceptions.py   # Custom exception classes
+├── tests/                 # Test files
+├── build/                 # Build artifacts
+├── dist/                  # Distribution packages
+├── reports/               # Security and analysis reports
+├── pyproject.toml         # Poetry configuration
+└── Makefile               # Build automation
+```
+
 ### Running the Application
 
 After building the project, you can run the app:
 
 ```bash
-# Run the app
-poetry run python-api-template-python-api-template
+# Run the app using the script entry point
+poetry run python-api-template
+
+# Or run directly with uvicorn
+poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
 ```
 
 ### Available Make Tasks
 
 Run `make help` to see a list of available tasks in the Makefile.
+
+#### Security Scanning
+
+The project includes comprehensive security scanning capabilities:
+
+```bash
+# Run security vulnerability scan
+make check-security
+
+# Generate Software Bill of Materials (SBOM)
+make generate-sbom
+
+# Run comprehensive security audit
+make security-audit
+
+# Scan Docker image for vulnerabilities
+make scan-image IMAGE_NAME=myimage IMAGE_TAG=mytag
+
+# Update Trivy vulnerability database
+make update-trivy-db
+```
+
+Security reports are saved to the `reports/` directory:
+- `reports/trivy-vulnerabilities.json` - JSON vulnerability report
+- `reports/trivy-vulnerabilities-table.txt` - Human-readable vulnerability table
+- `reports/sbom-cyclonedx.json` - SBOM in CycloneDX format
+- `reports/sbom-spdx.json` - SBOM in SPDX format
+
+**Note**: The `make build` command automatically runs vulnerability checks and will fail if CRITICAL/HIGH/MEDIUM vulnerabilities are found.
 
 ### Dependency Setup
 
@@ -212,3 +272,23 @@ The **Make Python DevEx** project structure is designed with a focus on enhancin
 ## Conclusion
 
 By combining **Poetry**, `Makefile`, and well-defined processes, the **Make Python DevEx** structure provides a robust, scalable, and developer-friendly foundation for Python projects that outshines the simplicity of raw Python projects.
+
+## Security Features
+
+This template includes comprehensive security features:
+
+- **Vulnerability Scanning**: Automated Trivy scanning for dependencies and filesystem
+- **SBOM Generation**: Software Bill of Materials in CycloneDX and SPDX formats
+- **Build-time Checks**: Automatic vulnerability checks during build process
+- **Structured Logging**: JSON-formatted logs with ECS (Elastic Common Schema) format
+- **Input Validation**: Request validation with detailed error messages
+- **CORS Configuration**: Configurable Cross-Origin Resource Sharing settings
+
+## Development Features
+
+- **Type Checking**: MyPy integration with comprehensive type stubs
+- **Code Formatting**: Black and Ruff for consistent code style
+- **Testing**: Pytest with coverage reporting and multiple output formats
+- **Async Support**: Full async/await support with strict asyncio mode
+- **Environment Management**: Flexible environment variable configuration
+- **Error Handling**: Custom exception classes with structured error responses

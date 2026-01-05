@@ -10,7 +10,7 @@
 ##
 
 ## Source location
-MODULE_BASE_DIR = python_api_template
+MODULE_BASE_DIR = src
 TESTS_BASE_DIR = tests
 
 ## Pythonic variables
@@ -74,6 +74,9 @@ RUFF ?= $(POETRY) run ruff
 BLACK ?= $(POETRY) run black
 MYPY ?= $(POETRY) run mypy
 PYTEST ?= $(POETRY) run pytest
+TRIVY ?= trivy
+TRIVY_CACHE_DIR ?= .trivy-cache
+TRIVY_SEVERITY ?= CRITICAL,HIGH,MEDIUM
 
 ###
 ### TASKS
@@ -114,7 +117,7 @@ test-integration: ## Run integration tests
 # $(PYTEST) tests -m integration
 
 .PHONY: check
-check: check-py-ruff-format check-py-ruff-lint check-py-mypy ## Run all checks
+check: check-py-ruff-format check-py-ruff-lint check-py-mypy check-security ## Run all checks
 
 .PHONY: check-py-ruff-lint
 check-py-ruff-lint: ## Run ruff linter
@@ -138,8 +141,8 @@ check-py-ruff-format: ## Runs ruff code formatter
 	$(RUFF) $(RUFF_OPTS) check $(MODULE_BASE_DIR) $(TESTS_BASE_DIR)
 
 BUILD_DIR ?= build
-REPORTS_DIR = $(BUILD_DIR)/reports
-MYPY_OPTS ?= --show-column-numbers --pretty --html-report $(REPORTS_DIR)/mypy
+REPORTS_DIR = reports
+MYPY_OPTS ?= --show-column-numbers --pretty --html-report $(BUILD_DIR)/reports/mypy
 .PHONY: check-py-mypy
 check-py-mypy: ## Run MyPy typechecker
 	$(MYPY) $(MYPY_OPTS) $(MODULE_BASE_DIR) $(TESTS_BASE_DIR)
@@ -155,7 +158,7 @@ format-py: ## Runs formatter, makes changes where necessary
 ##@ Building and Publishing
 
 .PHONY: build
-build: poetry-build ## Build an artifact
+build: poetry-build check-vulnerabilities-only ## Build an artifact with vulnerability check (fails on HIGH/CRITICAL)
 
 .PHONY: publish
 publish: poetry-publish ## Publish an artifact
@@ -197,6 +200,155 @@ install-poetry: ## Installs Poetry to the current Python environment
 	@echo "$(COLOR_ORANGE)Installing Poetry from python-poetry.org with $(CURRENT_PYTHON)$(COLOR_RESET)"
 	curl -sSL https://install.python-poetry.org | $(CURRENT_PYTHON) -
 
+.PHONY: check-security
+check-security: check-security-trivy ## Check for known security vulnerabilities in dependencies
+
+.PHONY: check-security-trivy
+check-security-trivy: ## Check for known security vulnerabilities using Trivy
+	@echo "$(COLOR_BLUE)[CHECK-SECURITY] Running comprehensive Trivy vulnerability scan (filesystem + secrets + misconfig)...$(COLOR_RESET)"
+	@mkdir -p $(REPORTS_DIR)
+	@if [ -d "$(TRIVY_CACHE_DIR)" ] && [ -n "$(TRIVY_CACHE_DIR)" ]; then \
+		echo "$(COLOR_BLUE)Using cached Trivy database from $(TRIVY_CACHE_DIR)$(COLOR_RESET)"; \
+		echo "$(COLOR_BLUE)Initializing Trivy cache structure...$(COLOR_RESET)"; \
+		echo "Cache is ready for use with --skip-db-update flag"; \
+		CACHE_ARGS="--cache-dir $(TRIVY_CACHE_DIR) --skip-db-update"; \
+	else \
+		echo "$(COLOR_BLUE)No cache directory found, downloading Trivy database...$(COLOR_RESET)"; \
+		CACHE_ARGS=""; \
+	fi; \
+	echo "$(COLOR_BLUE)Scanning for vulnerabilities (including dev dependencies)...$(COLOR_RESET)"; \
+	$(TRIVY) fs $$CACHE_ARGS --scanners vuln --include-dev-deps --severity $(TRIVY_SEVERITY) --format table . > $(REPORTS_DIR)/trivy-vulnerabilities-table.txt || { echo "$(COLOR_RED)Trivy vulnerability scan failed!$(COLOR_RESET)"; exit 1; }; \
+	echo "$(COLOR_BLUE)Scanning for secrets and misconfigurations...$(COLOR_RESET)"; \
+	$(TRIVY) fs $$CACHE_ARGS --scanners secret,misconfig --format json --output $(REPORTS_DIR)/trivy-secrets-config.json . || { echo "$(COLOR_RED)Trivy secrets/misconfig scan failed!$(COLOR_RESET)"; exit 1; }; \
+	echo "$(COLOR_BLUE)Generating JSON vulnerability report...$(COLOR_RESET)"; \
+	$(TRIVY) fs $$CACHE_ARGS --scanners vuln --include-dev-deps --severity $(TRIVY_SEVERITY) --format json --output $(REPORTS_DIR)/trivy-vulnerabilities.json . || { echo "$(COLOR_RED)Trivy JSON report generation failed!$(COLOR_RESET)"; exit 1; }
+	@echo "$(COLOR_BLUE)Checking for high/critical/medium vulnerabilities...$(COLOR_RESET)"
+	@if grep -q '"Severity": "CRITICAL"\|"Severity": "HIGH"\|"Severity": "MEDIUM"' $(REPORTS_DIR)/trivy-vulnerabilities.json; then \
+		echo "$(COLOR_RED)CRITICAL/HIGH/MEDIUM vulnerabilities found! Build failed.$(COLOR_RESET)"; \
+		echo "$(COLOR_BLUE)Full vulnerability report:$(COLOR_RESET)"; \
+		cat $(REPORTS_DIR)/trivy-vulnerabilities-table.txt; \
+		exit 1; \
+	else \
+		echo "$(COLOR_GREEN)No high/critical/medium/low vulnerabilities found.$(COLOR_RESET)"; \
+	fi
+	@echo "$(COLOR_GREEN) [CHECK-SECURITY] Comprehensive Trivy scan completed. Results saved to $(REPORTS_DIR)/$(COLOR_RESET)"
+
+.PHONY: generate-sbom
+generate-sbom: ## Generate Software Bill of Materials (SBOM)
+	@echo "$(COLOR_BLUE)Generating SBOM using Trivy...$(COLOR_RESET)"
+	@mkdir -p $(REPORTS_DIR)
+	@if [ -d "$(TRIVY_CACHE_DIR)" ] && [ -n "$(TRIVY_CACHE_DIR)" ]; then \
+		echo "$(COLOR_BLUE)Using cached Trivy database from $(TRIVY_CACHE_DIR)$(COLOR_RESET)"; \
+		CACHE_ARGS="--cache-dir $(TRIVY_CACHE_DIR) --skip-db-update"; \
+	else \
+		echo "$(COLOR_ORANGE)No Trivy cache directory specified, downloading database$(COLOR_RESET)"; \
+		CACHE_ARGS=""; \
+	fi; \
+	$(TRIVY) fs $$CACHE_ARGS --scanners vuln --include-dev-deps --format cyclonedx --output $(REPORTS_DIR)/sbom-cyclonedx.json .; \
+	$(TRIVY) fs $$CACHE_ARGS --scanners vuln --include-dev-deps --format spdx --output $(REPORTS_DIR)/sbom-spdx.json .
+	@echo "$(COLOR_GREEN)SBOM generated in multiple formats:$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)  - CycloneDX: $(REPORTS_DIR)/sbom-cyclonedx.json$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)  - SPDX: $(REPORTS_DIR)/sbom-spdx.json$(COLOR_RESET)"
+
+.PHONY: scan-docker
+scan-docker: ## Scan Docker images for vulnerabilities
+	@echo "$(COLOR_BLUE)Scanning Docker images for vulnerabilities...$(COLOR_RESET)"
+	@if [ -f "Dockerfile" ] || [ -f "dockerfile" ]; then \
+		echo "$(COLOR_BLUE)Scanning dockerfile...$(COLOR_RESET)"; \
+		if [ -d "$(TRIVY_CACHE_DIR)" ] && [ -n "$(TRIVY_CACHE_DIR)" ]; then \
+			CACHE_ARGS="--cache-dir $(TRIVY_CACHE_DIR) --skip-db-update"; \
+		else \
+			CACHE_ARGS=""; \
+		fi; \
+		$(TRIVY) fs $$CACHE_ARGS --scanners misconfig --format json --output $(REPORTS_DIR)/trivy-dockerfile.json .; \
+		echo "$(COLOR_GREEN)Dockerfile scan completed. Results saved to $(REPORTS_DIR)/trivy-dockerfile.json$(COLOR_RESET)"; \
+	else \
+		echo "$(COLOR_ORANGE)No dockerfile found, skipping Docker scan$(COLOR_RESET)"; \
+	fi
+
+.PHONY: update-trivy-db
+update-trivy-db: ## Update Trivy vulnerability database
+	@echo "$(COLOR_BLUE)Updating Trivy vulnerability database...$(COLOR_RESET)"
+	$(TRIVY) image --download-db-only
+	@echo "$(COLOR_GREEN)Trivy database updated!$(COLOR_RESET)"
+
+.PHONY: security-audit
+security-audit: check-security generate-sbom scan-docker ## Comprehensive security audit including Trivy and SBOM generation
+	@echo "$(COLOR_GREEN)Security audit completed!$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)Reports available in: $(REPORTS_DIR)$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)Summary of findings:$(COLOR_RESET)"
+	@if [ -f "$(REPORTS_DIR)/trivy-vulnerabilities-table.txt" ]; then \
+		echo "$(COLOR_BLUE)Vulnerability Summary:$(COLOR_RESET)"; \
+		cat $(REPORTS_DIR)/trivy-vulnerabilities-table.txt; \
+	fi
+
+.PHONY: check-vulnerabilities-only
+check-vulnerabilities-only: ## Check only for vulnerabilities (fails build on HIGH/CRITICAL)
+	@echo "$(COLOR_BLUE) [BUILD-CHECK] Running filesystem vulnerability scan (build requirement)...$(COLOR_RESET)"
+	@mkdir -p $(REPORTS_DIR)
+	@if [ -d "$(TRIVY_CACHE_DIR)" ] && [ -n "$(TRIVY_CACHE_DIR)" ]; then \
+		echo "$(COLOR_BLUE)Using cached Trivy database from $(TRIVY_CACHE_DIR)$(COLOR_RESET)"; \
+		echo "$(COLOR_BLUE)Initializing Trivy cache structure...$(COLOR_RESET)"; \
+		echo "Cache is ready for use with --skip-db-update flag"; \
+		$(TRIVY) fs --cache-dir $(TRIVY_CACHE_DIR) --skip-db-update --scanners vuln --include-dev-deps --severity $(TRIVY_SEVERITY) --format table . > $(REPORTS_DIR)/trivy-vulnerabilities-table.txt || { echo "$(COLOR_RED)Trivy scan failed!$(COLOR_RESET)"; exit 1; }; \
+		$(TRIVY) fs --cache-dir $(TRIVY_CACHE_DIR) --skip-db-update --scanners vuln --include-dev-deps --severity $(TRIVY_SEVERITY) --format json --output $(REPORTS_DIR)/trivy-vulnerabilities.json . || { echo "$(COLOR_RED)Trivy JSON report generation failed!$(COLOR_RESET)"; exit 1; }; \
+	else \
+		echo "$(COLOR_BLUE)No cache directory found, downloading Trivy database...$(COLOR_RESET)"; \
+		$(TRIVY) fs --scanners vuln --include-dev-deps --severity $(TRIVY_SEVERITY) --format table . > $(REPORTS_DIR)/trivy-vulnerabilities-table.txt || { echo "$(COLOR_RED)Trivy scan failed!$(COLOR_RESET)"; exit 1; }; \
+		$(TRIVY) fs --scanners vuln --include-dev-deps --severity $(TRIVY_SEVERITY) --format json --output $(REPORTS_DIR)/trivy-vulnerabilities.json . || { echo "$(COLOR_RED)Trivy JSON report generation failed!$(COLOR_RESET)"; exit 1; }; \
+	fi
+	@if grep -q '"Severity": "CRITICAL"\|"Severity": "HIGH"\|"Severity": "MEDIUM"' $(REPORTS_DIR)/trivy-vulnerabilities.json; then \
+		echo "$(COLOR_RED)CRITICAL/HIGH/MEDIUM vulnerabilities found! Build failed.$(COLOR_RESET)"; \
+		echo "$(COLOR_BLUE)Vulnerability details:$(COLOR_RESET)"; \
+		cat $(REPORTS_DIR)/trivy-vulnerabilities-table.txt; \
+		exit 1; \
+	else \
+		echo "$(COLOR_GREEN) No high/critical/medium/low vulnerabilities found.$(COLOR_RESET)"; \
+	fi
+	@echo "$(COLOR_GREEN) [BUILD-CHECK] Filesystem vulnerability check completed. Build can proceed.$(COLOR_RESET)"
+
+.PHONY: scan-image
+scan-image: ## Scan Docker image for vulnerabilities (fails build on CRITICAL/HIGH)
+	@echo "$(COLOR_BLUE)[IMAGE-SCAN] Scanning Docker image for vulnerabilities...$(COLOR_RESET)"
+	@mkdir -p $(REPORTS_DIR)
+	@if [ -z "$(IMAGE_NAME)" ] || [ -z "$(IMAGE_TAG)" ]; then \
+		echo "$(COLOR_RED)Error: IMAGE_NAME and IMAGE_TAG must be set$(COLOR_RESET)"; \
+		echo "$(COLOR_BLUE)Usage: make scan-image IMAGE_NAME=myimage IMAGE_TAG=mytag$(COLOR_RESET)"; \
+		exit 1; \
+	fi
+	@echo "$(COLOR_BLUE)Scanning image: $(IMAGE_NAME):$(IMAGE_TAG)$(COLOR_RESET)"
+	$(TRIVY) image --scanners vuln --severity $(TRIVY_SEVERITY) --format table $(IMAGE_NAME):$(IMAGE_TAG) > $(REPORTS_DIR)/trivy-image-vulnerabilities-table.txt
+	$(TRIVY) image --scanners vuln --severity $(TRIVY_SEVERITY) --format json --output $(REPORTS_DIR)/trivy-image-vulnerabilities.json $(IMAGE_NAME):$(IMAGE_TAG) || true
+	@echo "$(COLOR_BLUE)Checking for CRITICAL/HIGH vulnerabilities...$(COLOR_RESET)"
+	@if grep -q '"Severity": "CRITICAL"\|"Severity": "HIGH"' $(REPORTS_DIR)/trivy-image-vulnerabilities.json; then \
+		echo "$(COLOR_RED)CRITICAL/HIGH vulnerabilities found in image! Build failed.$(COLOR_RESET)"; \
+		echo "$(COLOR_BLUE)Vulnerability details:$(COLOR_RESET)"; \
+		cat $(REPORTS_DIR)/trivy-image-vulnerabilities-table.txt; \
+		exit 1; \
+	else \
+		echo "$(COLOR_GREEN)No CRITICAL/HIGH vulnerabilities found in image.$(COLOR_RESET)"; \
+	fi
+
+.PHONY: scan-image-all
+scan-image-all: ## Scan Docker image for all vulnerabilities (including MEDIUM/LOW)
+	@echo "$(COLOR_BLUE)Scanning Docker image for all vulnerabilities...$(COLOR_RESET)"
+	@mkdir -p $(REPORTS_DIR)
+	@if [ -z "$(IMAGE_NAME)" ] || [ -z "$(IMAGE_TAG)" ]; then \
+		echo "$(COLOR_RED)Error: IMAGE_NAME and IMAGE_TAG must be set$(COLOR_RESET)"; \
+		echo "$(COLOR_BLUE)Usage: make scan-image-all IMAGE_NAME=myimage IMAGE_TAG=mytag$(COLOR_RESET)"; \
+		exit 1; \
+	fi
+	@echo "$(COLOR_BLUE)Scanning image: $(IMAGE_NAME):$(IMAGE_TAG)$(COLOR_RESET)"
+	$(TRIVY) image --scanners vuln --severity $(TRIVY_SEVERITY) --format table $(IMAGE_NAME):$(IMAGE_TAG) > $(REPORTS_DIR)/trivy-image-vulnerabilities-table.txt
+	$(TRIVY) image --scanners vuln --severity $(TRIVY_SEVERITY) --format json --output $(REPORTS_DIR)/trivy-image-vulnerabilities.json $(IMAGE_NAME):$(IMAGE_TAG) || true
+	@echo "$(COLOR_BLUE)Vulnerability scan completed. Results saved to $(REPORTS_DIR)/$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)Vulnerability summary:$(COLOR_RESET)"
+	@cat $(REPORTS_DIR)/trivy-image-vulnerabilities-table.txt
+
+.PHONY: ci-security
+ci-security: check-security generate-sbom ## Run security checks for CI/CD pipeline
+	@echo "$(COLOR_GREEN)CI security checks completed!$(COLOR_RESET)"
+
 .PHONY: deps
 deps: deps-brew deps-py $(DEPS_TASKS_IF_PERU_CONFIG) install-precommit ## Installs all dependencies
 	@echo "$(COLOR_GREEN)All deps installed!$(COLOR_RESET)"
@@ -214,7 +366,8 @@ COLOR_GREEN = \033[32m
 COLOR_RESET = \033[0m
 .PHONY: deps-brew
 deps-brew: ## Installs development dependencies from Homebrew
-	brew bundle install $(BREW_BUNDLE_OPTS) --no-lock --verbose --file=Brewfile
+	@echo "$(COLOR_BLUE)Installing Homebrew dependencies...$(COLOR_RESET)"
+	@HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_ENV_HINTS=1 brew bundle install $(BREW_BUNDLE_OPTS) --verbose --file=Brewfile || true
 	@test -n "$(PYENV_SHELL)" || ( \
 		echo "$(COLOR_ORANGE)PYENV_SHELL is empty so pyenv may not be setup.$(COLOR_RESET)" && \
 		echo "$(COLOR_ORANGE)Ensure that pyenv is setup in your shell config, e.g. in ~/.bashrc.$(COLOR_RESET)" && \
@@ -281,11 +434,14 @@ poetry-relock: pyproject.toml ## Run poetry lock w/o updating deps, use after ch
 
 .PHONY: poetry-build
 poetry-build: poetry-set-version ## Run poetry build with any environment-required flags
+	@echo "$(COLOR_BLUE)Cleaning old build artifacts...$(COLOR_RESET)"
+	@rm -rf dist/*.whl dist/*.tar.gz
 	$(POETRY) build
 
 # For release builds, pass this into poetry-set-version-from-git, e.g. ARTIFACT_VERSION=${CI_BUILD_TAG}
 ifndef ARTIFACT_VERSION
-ARTIFACT_VERSION = $(shell git describe --tags | sed -e 's/-/+/')
+# Try git describe --tags, fallback to 0.0.1+<short-commit-hash> if no tags exist
+ARTIFACT_VERSION = $(shell git describe --tags 2>/dev/null | sed -e 's/-/+/' || echo "0.0.1+$$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')")
 endif
 
 .PHONY: poetry-set-version
@@ -339,6 +495,6 @@ fix-poetry-conflicts-2: ## Another way to try to fix Poetry merge/rebase conflic
 all:
 .PHONY: clean
 clean: ## Clean artifacts from build and dist directories
-	rm -rf $(BUILD_DIR) dist/requirements.txt
+	rm -rf $(BUILD_DIR) dist/requirements.txt dist/*.whl dist/*.tar.gz
 start:
 	python3 -m python_api_template
