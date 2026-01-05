@@ -61,7 +61,7 @@ types-retry = "*"
 ## enables MyPy to properly validate requests.get() calls, response methods, etc.
 ## Without this, we'd get "Library stubs not installed for requests" errors
 types-requests = "^2.32.4.20250809"
-types-psutil = "^7.0.0.20251001"
+types-psutil = "^7.2.1.20251231"
 
 
 ## Configure publish destination explicitly, for safety
