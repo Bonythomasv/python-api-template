@@ -1,56 +1,101 @@
-Here’s a reformatted and modified version of the README file, with clearer instructions for developers on how to build, test, lint, and deploy the code:
+# Python API Template
 
----
+A production-ready Python FastAPI template with comprehensive security scanning, structured logging, middleware, and modern development tooling. Built following the Make Python DevEx best practices.
 
-# Example Repo for Make Python DevEx
+## 🚀 Features
 
-This repository contains a simple Python® project setup using the Make Python DevEx system, as described and built by Colin Dean. For more details, read the [Make Python DevEx blog post](https://tech.target.com/blog/make-python-devex).
+### Core Application Features
 
-## Quickstart
+- **FastAPI Framework**: Modern, fast web framework for building APIs with automatic OpenAPI documentation
+- **Structured Logging**: JSON-formatted logs with ECS (Elastic Common Schema) format for better observability
+- **Request/Response Logging**: Automatic logging of all incoming requests and responses with performance metrics
+- **Request ID Tracking**: Unique request IDs for tracing requests through the system
+- **Custom Exception Handling**: Structured error responses with proper HTTP status codes
+- **Environment-based Configuration**: Flexible configuration management using environment variables
+- **Async/Await Support**: Full async support with strict asyncio mode for optimal performance
 
-Follow these steps to set up the project and get started:
+### Security Features
+
+- **Trivy Vulnerability Scanning**: Comprehensive security scanning for dependencies, filesystem, secrets, and misconfigurations
+- **SBOM Generation**: Software Bill of Materials in CycloneDX and SPDX formats for compliance
+- **Build-time Security Checks**: Automatic vulnerability checks during build process (blocks on CRITICAL/HIGH/MEDIUM)
+- **Docker Image Scanning**: Scan container images for vulnerabilities before deployment
+- **Secret Detection**: Automated scanning for exposed secrets and credentials
+- **CORS Configuration**: Configurable Cross-Origin Resource Sharing settings
+- **Request Size Limits**: Protection against oversized request payloads
+- **Input Validation**: Request validation with detailed error messages
+- **Security Headers**: Automatic security headers in responses
+
+### Middleware & Request Handling
+
+- **CORS Middleware**: Configurable cross-origin resource sharing
+- **Request Size Limiting**: Protection against oversized requests
+- **Rate Limiting**: Configurable rate limiting (ready for implementation)
+- **JWT Authorization**: JWT token validation middleware (ready for implementation)
+- **Permission Authorization**: Role-based access control middleware (ready for implementation)
+- **Request Logging Middleware**: Detailed request/response logging with performance metrics
+
+### Development Tools
+
+- **Poetry**: Modern dependency management with lock file support
+- **Type Checking**: MyPy integration with comprehensive type stubs
+- **Code Formatting**: Black for consistent code style
+- **Linting**: Ruff for fast linting and style checking
+- **Testing**: Pytest with coverage reporting and multiple output formats (HTML, JUnit, TAP)
+- **Pre-commit Hooks**: Automated code quality checks before commits
+- **Makefile Automation**: Comprehensive task automation for common development tasks
+
+### CI/CD Integration
+
+- **GitLab CI/CD**: Complete pipeline with test, security scanning, and build stages
+- **Automated Security Scanning**: Trivy scans in CI pipeline
+- **Docker Image Building**: Automated container image builds
+- **Artifact Management**: Build artifacts and reports saved as CI artifacts
+- **Multi-stage Pipeline**: Separate stages for test, security, and build
+
+### Project Structure
+
+- **src/ Layout**: Modern Python project structure with source directory
+- **Modular Architecture**: Organized core modules (config, logging, exceptions, constants)
+- **Separation of Concerns**: Clear separation between application logic and infrastructure
+- **Scalable Structure**: Easy to extend with new features and modules
+
+## 📋 Table of Contents
+
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Development Workflow](#development-workflow)
+- [Configuration](#configuration)
+- [Security Scanning](#security-scanning)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Building & Deployment](#building--deployment)
+- [Available Make Targets](#available-make-targets)
+- [Troubleshooting](#troubleshooting)
+
+## 🏃 Quick Start
 
 ### Prerequisites
 
-- Ensure you have [Homebrew](https://brew.sh) installed on your system.
-- Make sure the `brew` command is available (`which brew`).
+- [Homebrew](https://brew.sh) installed (macOS) or appropriate package manager (Linux)
+- Python 3.9-3.13
+- Make
 
-### Clone the Repository
-
-You can clone the repository using either of the following commands:
-
-```bash
-# Using GitHub CLI
-gh repo clone target/python-api-template
-
-# Or using Git
-git clone https://github.com/target/make-python-devex.git
-```
-
-### Install Dependencies
-
-Run the following commands to install the necessary dependencies:
+### Installation
 
 ```bash
-# Install dependencies
+# Clone the repository
+git clone <repository-url>
+cd python-api-template
+
+# Install all dependencies
 make deps
 
-# Run test
-make test
-
-# Run test
-make build
-
-or
-
-# to install dependencies, check the code, run tests, and build the distributable
-make deps check test build
-
+# Run checks, tests, and build
+make check test build
 ```
 
 ### Running the API Server
-
-To run the API server, use one of the following methods:
 
 ```bash
 # Using uvicorn directly
@@ -58,237 +103,419 @@ poetry run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 
 # Or using the script entry point
 poetry run python-api-template
+
+# Or using make
+make start
 ```
 
 The API will be available at:
-- API: http://localhost:8000
-- Swagger UI: http://localhost:8000/docs (in development mode)
-- ReDoc: http://localhost:8000/redoc (in development mode)
+- **API**: http://localhost:8000
+- **Health Check**: http://localhost:8000/health
+- **OpenAPI Docs**: http://localhost:8000/docs (if enabled)
+- **ReDoc**: http://localhost:8000/redoc (if enabled)
 
-### Building and Running Docker Images
-
-To build and run the Docker image, use the following commands:
-
-```bash
-# Build the Docker image
-docker build -t python-api-template:latest .
-
-# Run the Docker container
-docker run -p 8000:8000 python-api-template:latest
-```
-
-### Project Structure
-
-The project uses a modern `src/` layout:
+## 📁 Project Structure
 
 ```
 python-api-template/
-├── src/                    # Source code
-│   ├── __init__.py        # Package initialization
-│   ├── main.py            # FastAPI application entry point
-│   └── core/              # Core utilities and configuration
+├── src/                           # Source code
+│   ├── __init__.py
+│   ├── main.py                   # FastAPI application entry point
+│   └── core/                     # Core utilities and configuration
 │       ├── __init__.py
-│       ├── config.py      # Environment configuration
-│       ├── constants.py    # Application constants
-│       ├── enhanced_logging.py  # Structured JSON logging
-│       └── exceptions.py   # Custom exception classes
-├── tests/                 # Test files
-├── build/                 # Build artifacts
-├── dist/                  # Distribution packages
-├── reports/               # Security and analysis reports
-├── pyproject.toml         # Poetry configuration
-└── Makefile               # Build automation
+│       ├── config.py             # Environment configuration management
+│       ├── constants.py          # Application constants (HTTP messages, API paths, etc.)
+│       ├── enhanced_logging.py   # Structured JSON logging with ECS format
+│       └── exceptions.py        # Custom exception classes
+├── tests/                        # Test files
+├── build/                        # Build artifacts
+├── dist/                         # Distribution packages
+├── reports/                      # Security and analysis reports
+│   ├── trivy-vulnerabilities.json
+│   ├── trivy-vulnerabilities-table.txt
+│   ├── sbom-cyclonedx.json
+│   └── sbom-spdx.json
+├── .gitlab-ci.yml               # GitLab CI/CD pipeline configuration
+├── .pre-commit-config.yaml      # Pre-commit hooks configuration
+├── .trivyignore                 # Trivy ignore patterns
+├── pyproject.toml               # Poetry configuration and dependencies
+├── poetry.lock                  # Locked dependency versions
+├── Dockerfile                   # Docker container definition
+├── Makefile                     # Build automation and task runner
+└── README.md                    # This file
 ```
 
-### Running the Application
+## 🔧 Development Workflow
 
-After building the project, you can run the app:
-
-```bash
-# Run the app using the script entry point
-poetry run python-api-template
-
-# Or run directly with uvicorn
-poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
-```
-
-### Available Make Tasks
-
-Run `make help` to see a list of available tasks in the Makefile.
-
-#### Security Scanning
-
-The project includes comprehensive security scanning capabilities:
+### Standard Development Cycle
 
 ```bash
-# Run security vulnerability scan
+# 1. Install/update dependencies
+make deps
+
+# 2. Run code quality checks
+make check
+
+# 3. Run tests
+make test
+
+# 4. Run security scans
 make check-security
+
+# 5. Build the project
+make build
+```
+
+### Code Quality
+
+The project uses multiple tools to ensure code quality:
+
+- **Ruff**: Fast Python linter and formatter
+- **Black**: Opinionated code formatter (119 character line length)
+- **MyPy**: Static type checker with strict settings
+- **Pytest**: Testing framework with coverage reporting
+
+```bash
+# Run all checks
+make check
+
+# Run specific checks
+make check-py-ruff-format    # Linting and formatting
+make check-py-mypy           # Type checking
+make check-py-black-format   # Format code with Black
+```
+
+### Pre-commit Hooks
+
+Pre-commit hooks automatically run checks before commits:
+
+```bash
+# Install pre-commit hooks
+make install-precommit
+
+# Run pre-commit hooks manually
+make check-precommit
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+The application uses environment variables for configuration. Create a `.env` file or set environment variables:
+
+```bash
+# Environment
+ENVIRONMENT=development  # development, staging, production
+
+# CORS
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+
+# Security
+DISABLE_JWT_VALIDATION=false
+REQUEST_SIZE_LIMIT_BYTES=10485760  # 10MB
+
+# Rate Limiting
+RATE_LIMIT_ENABLED=true
+
+# Database (if needed)
+DATABASE_URL=postgresql://user:password@localhost/dbname
+
+# Logging
+LOG_LEVEL=INFO
+```
+
+See `src/core/config.py` for all available configuration options.
+
+### Logging Configuration
+
+The application uses structured JSON logging with ECS format:
+
+- **Console Output**: JSON-formatted logs for easy parsing
+- **File Logging**: Rotating file handlers for log persistence
+- **Log Levels**: Configurable via `LOG_LEVEL` environment variable
+- **Request Logging**: Automatic logging of all requests with:
+  - Request ID
+  - Client IP
+  - HTTP method and path
+  - Response status code
+  - Request duration
+  - User agent
+
+## 🔒 Security Scanning
+
+### Trivy Integration
+
+The project includes comprehensive Trivy security scanning:
+
+```bash
+# Run comprehensive security scan (vulnerabilities + secrets + misconfig)
+make check-security
+
+# Run vulnerability scan only
+make check-security-trivy
 
 # Generate Software Bill of Materials (SBOM)
 make generate-sbom
 
-# Run comprehensive security audit
-make security-audit
-
-# Scan Docker image for vulnerabilities
-make scan-image IMAGE_NAME=myimage IMAGE_TAG=mytag
+# Scan Docker image
+make scan-image IMAGE_NAME=python-api-template IMAGE_TAG=latest
 
 # Update Trivy vulnerability database
 make update-trivy-db
 ```
 
+### Security Reports
+
 Security reports are saved to the `reports/` directory:
+
 - `reports/trivy-vulnerabilities.json` - JSON vulnerability report
 - `reports/trivy-vulnerabilities-table.txt` - Human-readable vulnerability table
 - `reports/sbom-cyclonedx.json` - SBOM in CycloneDX format
 - `reports/sbom-spdx.json` - SBOM in SPDX format
 
-**Note**: The `make build` command automatically runs vulnerability checks and will fail if CRITICAL/HIGH/MEDIUM vulnerabilities are found.
+### Build-time Security Checks
 
-### Dependency Setup
+The `make build` command automatically runs vulnerability checks and will **fail** if CRITICAL/HIGH/MEDIUM vulnerabilities are found. This ensures vulnerable dependencies cannot be deployed.
 
-1. Run `make deps` until it succeeds, following any instructions provided during the process.
-2. After dependencies are installed, run the following to check the code, run tests, and build the distributable:
+### Ignoring False Positives
 
-```bash
-make check test build
+Add patterns to `.trivyignore` to ignore false positives:
+
+```
+# .trivyignore
+CVE-2023-1234  # Known false positive
+CVE-2023-5678  # Already patched in our version
 ```
 
+## 📚 API Documentation
+
+### OpenAPI/Swagger Documentation
+
+When enabled, the API provides automatic OpenAPI documentation:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **OpenAPI JSON**: http://localhost:8000/openapi.json
+
+### API Endpoints
+
+The template includes example endpoints. Add your own endpoints in `src/main.py`.
+
+### Request/Response Format
+
+All API responses follow a consistent format:
+
+```json
+{
+  "detail": "Error message or validation errors",
+  "message": "Human-readable message",
+  "status_code": 422
+}
+```
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+make test
+
+# Run unit tests only
+make test-unittests
+
+# Run with coverage
+make test-coverage
+
+# Run specific test file
+poetry run pytest tests/test_specific.py
+```
+
+### Test Output Formats
+
+Tests generate reports in multiple formats:
+
+- **HTML**: `build/report.html` - Interactive HTML report
+- **JUnit XML**: `build/report.junit.xml` - For CI/CD integration
+- **TAP**: `build/*.tap` - Test Anything Protocol format
+- **Coverage**: `build/coverage/` - Coverage reports
+
+### Test Configuration
+
+Test configuration is in `pyproject.toml`:
+
+- **Async Mode**: Strict asyncio mode for async tests
+- **Coverage**: Branch coverage enabled
+- **Markers**: Integration and unit test markers available
+
+## 🏗️ Building & Deployment
+
+### Building the Project
+
+```bash
+# Build distributable package
+make build
+
+# Build with specific version
+make build ARTIFACT_VERSION=1.0.0
+```
+
+Build artifacts are created in the `dist/` directory.
+
+### Docker
+
+#### Building Docker Image
+
+```bash
+# Build the Docker image
+docker build -t python-api-template:latest .
+
+# Or using make
+make docker-build
+```
+
+#### Running Docker Container
+
+```bash
+# Run the container
+docker run -p 8000:8000 python-api-template:latest
+
+# Run with environment variables
+docker run -p 8000:8000 \
+  -e ENVIRONMENT=production \
+  -e ALLOWED_ORIGINS=https://example.com \
+  python-api-template:latest
+```
+
+#### Scanning Docker Images
+
+```bash
+# Scan image for vulnerabilities
+make scan-image IMAGE_NAME=python-api-template IMAGE_TAG=latest
+```
+
+### CI/CD Pipeline
+
+The project includes a complete GitLab CI/CD pipeline (`.gitlab-ci.yml`) with:
+
+1. **Test Stage**: Run tests and code quality checks
+2. **Security Scan Stage**: Trivy vulnerability scanning and SBOM generation
+3. **Build Stage**: Build Docker image and scan for vulnerabilities
+
+The pipeline automatically:
+- Runs on every push
+- Blocks deployment on security vulnerabilities
+- Generates and stores security reports
+- Builds and pushes Docker images (when configured)
+
+## 📝 Available Make Targets
+
+Run `make help` to see all available targets. Key targets include:
+
+### Development
+- `make deps` - Install all dependencies
+- `make check` - Run all code quality checks
+- `make test` - Run tests
+- `make build` - Build the project
+- `make start` - Start the API server
+
+### Security
+- `make check-security` - Comprehensive security scan
+- `make check-security-trivy` - Vulnerability scan only
+- `make generate-sbom` - Generate SBOM files
+- `make scan-image` - Scan Docker image
+- `make update-trivy-db` - Update Trivy database
+
+### Code Quality
+- `make check-py-ruff-format` - Run Ruff linter
+- `make check-py-black-format` - Run Black formatter
+- `make check-py-mypy` - Run MyPy type checker
+- `make check-precommit` - Run pre-commit hooks
+
+### Dependencies
+- `make deps-py` - Install Python dependencies
+- `make deps-brew` - Install Homebrew dependencies
+- `make poetry-update` - Update Poetry dependencies
+- `make poetry-relock` - Relock Poetry dependencies
+
+### Docker
+- `make docker-build` - Build Docker image
+- `make docker-run` - Run Docker container
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### Poetry Command Not Found
+```bash
+# Install Poetry
+curl -sSL https://install.python-poetry.org | python3 -
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+#### Pyenv Version Not Found
+```bash
+# Install Python version
+pyenv install 3.13
+pyenv local 3.13
+```
+
+#### Security Vulnerabilities Blocking Build
+```bash
+# Update vulnerable dependencies
+make poetry-update PKGS="package-name"
+
+# Or update all dependencies
+make poetry-update
+```
+
+#### Trivy Database Update Issues
+```bash
+# Update Trivy database manually
+make update-trivy-db
+```
+
+## 📦 Dependencies
+
+### Production Dependencies
+
+- **FastAPI** (^0.116.0): Modern web framework
+- **Pydantic** (^2.10.4): Data validation
+- **Uvicorn** (^0.34.0): ASGI server
+- **Starlette** (^0.49.1+): Web framework (via FastAPI)
+- **Jinja2** (^3.1.6+): Template engine
+- **h11** (^0.16.0+): HTTP/1.1 protocol implementation
+
+### Development Dependencies
+
+- **Pytest**: Testing framework
+- **Black**: Code formatter
+- **Ruff**: Linter and formatter
+- **MyPy**: Type checker
+- **Pytest-cov**: Coverage reporting
+- **Pre-commit**: Git hooks
+
+See `pyproject.toml` for the complete list of dependencies.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run `make check test build` to ensure everything passes
+5. Submit a pull request
+
+## 📄 License
+
+See the [LICENSE](LICENSE.md) file for licensing information.
+
+## 🙏 Acknowledgments
+
+- Built following the [Make Python DevEx](https://tech.target.com/blog/make-python-devex) best practices
+- Uses [Poetry](https://python-poetry.org/) for dependency management
+- Security scanning powered by [Trivy](https://github.com/aquasecurity/trivy)
+- "Python" and the Python logos are trademarks or registered trademarks of the Python Software Foundation
+
 ---
 
-## Legal Notices
-
-- See the [LICENSE](LICENSE.md) file for licensing information.
-- "Python" and the Python logos are trademarks or registered trademarks of the Python Software Foundation, used by Target [with permission](https://www.python.org/psf/trademarks/#how-to-use-the-trademarks) from the Foundation.
-
----
-
-This format makes it easier for developers to follow step-by-step instructions for setting up, testing, linting, building, and deploying the project.
-
-Comparison between poetry and raw python
-
-| Feature                | Poetry                          | Raw Python                       |
-|------------------------|----------------------------------|----------------------------------|
-| **Dependency Management** | Automatic resolution & locking | Manual (`requirements.txt`)      |
-| **Virtual Environment**   | Auto-created & managed         | Manual setup (`venv`)            |
-| **Packaging**             | Simplified (`poetry build`)    | Manual (`setup.py` or `wheel`)   |
-| **Reproducibility**       | `poetry.lock` ensures it       | Requires manual pinning          |
-
-Poetry:
-	•	Combines multiple tools into a single CLI.
-	•	Examples:
-	•	poetry install: Installs dependencies and sets up the virtual environment.
-	•	poetry run <command>: Runs a command inside the project’s virtual environment.
-	•	poetry build: Builds a Python package.
-	•	poetry publish: Publishes the package to PyPI.
-Raw Python:
-	•	Requires chaining multiple tools:
-	•	python -m venv .venv
-	•	source .venv/bin/activate
-	•	pip install -r requirements.txt
-	•	python setup.py sdist bdist_wheel
-
-Comparison between poetry and makefile
-
-
-| Feature                | Makefile                        | Poetry                          |
-|------------------------|----------------------------------|----------------------------------|
-| **Purpose**             | General-purpose task automation tool | Python-specific dependency and packaging manager |
-| **Dependency Management** | Requires external tools (e.g., pip, poetry) | Built-in dependency management with locking |
-| **Task Automation**     | Highly flexible, supports any type of task | Limited to Python-related tasks |
-| **Ease of Use**         | Requires manual scripting       | Simplified CLI for Python tasks |
-| **Virtual Environment** | Needs manual setup (`venv`)     | Automatically created and managed |
-| **Packaging**           | Not designed for Python packaging | Simplified (`poetry build`)     |
-| **Reproducibility**     | Relies on external tools and scripts | Ensured via `poetry.lock`       |
-| **Multi-Language Support** | Yes, supports any language or tool | No, Python-specific            |
-
-
-A Complete Example
-
-We’ve launched a complete example project at https://github.com/target/make-python-devex. The only prerequisites match our standard macOS development environment: Homebrew. Run make install-homebrew after cloning this repo and follow prompts, or follow the install instructions at Homebrew’s website.
-Once these files are in place, you’ll
-run make deps until it exits successfully, following prompts with each failure
-run make deps check test build ARTIFACT_VERSION=0.0.1 to see all deps installed, checks and test pass, and produce a build in the dist directory.
-run poetry run example-make-python-devex to actually see what the program does.
-
-
-# Why Use the Make Python DevEx Project Structure?
-
-Here are 5-6 reasons why this project structure is more beneficial compared to a simple raw Python project structure:
-
----
-
-## 1. Improved Developer Experience
-
-The **Make Python DevEx** project structure is designed with a focus on enhancing the developer experience by:
-
-- Streamlining repetitive tasks with `Makefile` commands.
-- Providing intuitive, documented commands like `make deps`, `make test`, and `make build` that abstract away complex workflows.
-
----
-
-## 2. Consistent Dependency Management
-
-- By integrating **Poetry**, the project ensures consistent dependency management with a `pyproject.toml` file and a `poetry.lock` file.
-- This eliminates the manual maintenance of `requirements.txt` files, reduces conflicts, and ensures reproducibility across environments.
-
----
-
-## 3. Simplified Task Automation
-
-- The `Makefile` serves as a one-stop-shop for automating common project tasks like testing, linting, building, and deployment.
-- Developers don’t need to memorize or manually run multiple complex commands, which reduces cognitive overhead.
-
----
-
-## 4. Enhanced Reproducibility
-
-- With `poetry.lock`, all dependencies and their versions are locked, ensuring that the same versions are installed across all environments.
-- This consistency is difficult to achieve with raw Python projects unless managed manually.
-
----
-
-## 5. Standardized Project Structure
-
-- The **Make Python DevEx** structure enforces a standardized layout, making it easier for new developers to onboard.
-- Features like the `dist/` directory for builds and predefined `Makefile` targets create a predictable and organized workflow.
-
----
-
-## 6. Cross-Environment Compatibility
-
-- This structure is designed to work seamlessly in local development, CI/CD pipelines, and production environments.
-- The use of `Makefile` and **Poetry** allows the project to adapt to various platforms and tools without significant changes to the workflow.
-
----
-
-## Bonus: Extensible and Scalable
-
-- The structure is easily extendable to include more tools and features as the project grows (e.g., integrating Docker for containerization or CI pipelines).
-- It’s suitable for both small and large teams, as it enforces consistency and best practices.
-
----
-
-## Conclusion
-
-By combining **Poetry**, `Makefile`, and well-defined processes, the **Make Python DevEx** structure provides a robust, scalable, and developer-friendly foundation for Python projects that outshines the simplicity of raw Python projects.
-
-## Security Features
-
-This template includes comprehensive security features:
-
-- **Vulnerability Scanning**: Automated Trivy scanning for dependencies and filesystem
-- **SBOM Generation**: Software Bill of Materials in CycloneDX and SPDX formats
-- **Build-time Checks**: Automatic vulnerability checks during build process
-- **Structured Logging**: JSON-formatted logs with ECS (Elastic Common Schema) format
-- **Input Validation**: Request validation with detailed error messages
-- **CORS Configuration**: Configurable Cross-Origin Resource Sharing settings
-
-## Development Features
-
-- **Type Checking**: MyPy integration with comprehensive type stubs
-- **Code Formatting**: Black and Ruff for consistent code style
-- **Testing**: Pytest with coverage reporting and multiple output formats
-- **Async Support**: Full async/await support with strict asyncio mode
-- **Environment Management**: Flexible environment variable configuration
-- **Error Handling**: Custom exception classes with structured error responses
+**Note**: This template is designed for production use with comprehensive security, logging, and development tooling. Customize it to fit your specific needs while maintaining the security and quality standards.
