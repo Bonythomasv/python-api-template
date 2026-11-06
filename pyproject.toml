@@ -24,7 +24,7 @@ python = ">=3.9,<3.14"
 # retry failing method calls
 retry2 = "^0.9"
 # mark things as deprecated
-deprecated = "^1.2"
+deprecated = "^1.3"
 # simple logging that just works
 loguru = "*"
 fastapi = "^0.116.0"
