@@ -24,12 +24,12 @@ python = ">=3.9,<3.14"
 # retry failing method calls
 retry2 = "^0.9"
 # mark things as deprecated
-deprecated = "^1.2"
+deprecated = "^1.3"
 # simple logging that just works
 loguru = "*"
 fastapi = "^0.116.0"
 pydantic = "^2.10.4"
-uvicorn = "^0.34.0"
+uvicorn = "^0.39.0"
 jinja2 = ">=3.1.6"
 h11 = ">=0.16.0"
 
@@ -69,7 +69,7 @@ types-psutil = "^7.0.0.20251001"
 ## Configure publish destination explicitly, for safety
 ## Default is PyPI but you probably don't want to do that internally.
 ## See also https://python-poetry.org/docs/repositories/#publishable-repositories
-mypy = "^1.14.1"
+mypy = "^1.19.1"
 pytest = "^8.3.4"
 [[tool.poetry.source]]
 name = "publish-source"
