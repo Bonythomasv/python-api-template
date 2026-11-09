@@ -19,7 +19,7 @@ jobs:
         env:
           SKIP: "Reset Poetry Project Version to 0.0.0"
 
-      - uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7
+      - uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v7
         if: always()
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
